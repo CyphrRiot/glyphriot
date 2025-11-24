@@ -21,6 +21,19 @@ Standardized, wallet‑style seed word glyphs.
 
 This is exactly as accurate and reliable as typing the first 4 letters during wallet recovery, with the same user experience but faster input.
 
+## Examples
+
+```bash
+# Words → glyphs (no key)
+./bin/glyphriot brave coconut drift zebra
+
+# Words → glyphs (with a key)
+./bin/glyphriot --key "my secret" brave coconut drift zebra
+
+# Glyphs → words (exact)
+./bin/glyphriot '△□○×' '□□○×'
+```
+
 ## How it works
 
 - What this tool does (in one sentence):
@@ -160,24 +173,6 @@ If you use --list-file, your file must meet these rules:
 
 - Each 4‑glyph code maps to exactly one word in the selected list and key context.
 - The optional key (salt) permutes the entire list. Use the same key for encoding and decoding to recover the same mapping. Different keys produce unrelated mappings.
-
-## Examples
-
-```bash
-# No key
-$ ./bin/glyphriot brave coconut drift zebra
-•○△•  □□×•  ○○•△  ••○×
-
-# With key
-$ ./bin/glyphriot --key hunter2 brave coconut drift zebra
-□○△×  ○•×□  △○•×  ○•××
-
-# Decoding (example glyphs)
-$ ./bin/glyphriot '△□○×' '□□○×'
-List: bip39-en
-△□○× → <word>
-□□○× → <word>
-```
 
 ## License
 
