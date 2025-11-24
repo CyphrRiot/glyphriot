@@ -65,7 +65,8 @@ Phrase: letter advice cage absurd amount doctor
 
 ## Why this matters (offline, salted, storable)
 
-- Protect the words with your key (salt): Use --key or --prompt to apply a deterministic, SHA‑256‑based permutation; same key, same mapping anywhere.
+- Protect the words with your key (salt):
+  Use `--key` or `--prompt` to apply a deterministic, SHA‑256‑based permutation; same key, same mapping anywhere.
 - Offline conversion: Convert your seed phrase to a glyph representation entirely offline—no servers, no telemetry.
 - Safe to store the glyph: You can save the glyph in cloud storage (Dropbox, Drive, email yourself). It’s the key that unlocks the proper order and yields the exact phrase.
 - Restore forever: As long as you remember the one key you used, you can restore the exact phrase from the glyph—on any machine, offline.
@@ -73,10 +74,10 @@ Phrase: letter advice cage absurd amount doctor
 Recommended workflow
 
 - Encode (offline):
-    - glyphriot --prompt <words...> (enter key twice; keep a simple, human‑memorable passphrase)
+    - `glyphriot --prompt` enter key twice; keep a simple, human‑memorable passphrase)
     - Save the resulting glyph somewhere convenient (txt file, notes, cloud).
 - Decode (offline):
-    - glyphriot --prompt <glyph tokens> (enter the same key; prints the exact phrase)
+    - `glyphriot --prompt` (enter the same key; prints the exact phrase)
 
 Threat model
 
