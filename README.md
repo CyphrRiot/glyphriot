@@ -52,13 +52,16 @@ Glyph:
 Phrase: letter advice cage absurd amount doctor
 ```
 
-## Inspiration
+## Inspiration (with respect)
 
-- Navajo Code Talkers: Human ingenuity using language and context to protect critical communications under extreme pressure during WWII.
-- Enigma and Allied cryptanalysis: The cat‑and‑mouse evolution of practical cryptography and operational security.
-- Historical ciphers: From substitution and transposition ciphers to rotor machines and one‑time pads—the lineage of obfuscation and key‑based secrecy.
+- People who protected messages: Navajo Code Talkers used language and context to keep communications safe under extreme pressure.
+- Machines that taught humility: Enigma and Allied cryptanalysis shaped how we think about practical cryptography and operational security.
+- Simple ideas that endure: substitution tables, transposition, and one‑time pads—clear lessons about secrecy living in the key, not the artifact.
 
-GlyphRiot is not a cipher in the classical sense; it’s an exact, keyed mapping of BIP‑39 words to a compact “glyph alphabet.” It borrows the timeless principle that the secret (key) is what unlocks meaning—while the visible artifact (glyph) can be safely shared or stored.
+What this is (and isn’t)
+
+- This is a keyed, exact mapping between BIP‑39 words and a compact glyph alphabet. The key deterministically shuffles the list; the glyphs encode positions.
+- This is not a new cipher. It borrows a timeless principle: the key unlocks meaning. The visible artifact (glyph) can be safely stored or shared; the key stays in your head.
 
 ## Why this matters (offline, salted, storable)
 
