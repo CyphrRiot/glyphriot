@@ -11,14 +11,7 @@
 
 Standardized, wallet‑style seed word glyphs.
 
-- Fixed glyph digits (exactly 7):
-    - 0: △
-    - 1: □
-    - 2: ○
-    - 3: ×
-    - 4: •
-    - 5: ◇
-    - 6: ☆
+- Fixed glyph digits (exactly 7): △ □ ○ × • ◇ ☆
 - Fixed length: exactly 4 glyphs per word (unique mapping; decoding returns the exact word)
 - Optional keyed salt: SHA‑256(key) → PRNG → deterministic permutation of the 2048 BIP‑39 English words
 - Behavior mirrors wallet UX (Ledger/Trezor/MetaMask):
@@ -46,6 +39,8 @@ Input rules:
 - Anything else is rejected
 
 ## Install
+
+Download for Linux (latest binary): https://raw.githubusercontent.com/CyphrRiot/glyphriot/main/bin/glyphriot
 
 Requires Go 1.25+.
 
