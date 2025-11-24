@@ -22,16 +22,30 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ## How it works
 
-- Word list: BIP‑39 English (default), or a custom 2048‑line file.
-- Salt (key): If provided, a deterministic permutation P of the 2048 words is generated from SHA‑256(key). No key → identity order.
-- Code space: 7^4 = 2401 unique codes. Each word position n (0..2047) maps to code b = n.
-- Encoding (word → 4 glyphs):
-    1. Find the position n (0..2047) of the word in the permuted order P.
-    2. Convert n to base‑7 with exactly 4 digits (pad left with 0s).
-    3. Map digits 0..6 to △ □ ○ × • ◇ ☆ and emit the 4 glyphs.
-- Decoding (4 glyphs → word):
-    1. Convert 4 glyphs back to a base‑7 code b (0..2400).
-    2. If b ≥ 2048 → invalid code. Otherwise the word is P[b]. Exact 1→1.
+- What this tool does (in one sentence):
+    - It gives every seed word its own 4‑glyph “nickname,” and those 4 glyphs always decode back to the exact word.
+
+- Why it works (the simple math):
+    - We use 7 easy‑to‑read symbols and always show 4 of them → 7^4 = 2401 possible codes.
+    - There are 2048 BIP‑39 words, so each word can have its own unique code with room to spare.
+
+- With or without a key (salt):
+    - Optional key reshuffles the word list in a predictable way (wallet‑style). Use the same key to get the same codes. No key → standard order.
+
+- Encode (words → glyphs), in plain English:
+    1. Look up the word’s place in the (possibly reshuffled) 2048‑word list.
+    2. Turn that position into four base‑7 digits.
+    3. Replace digits 0..6 with these symbols: △ □ ○ × • ◇ ☆.
+
+- Decode (glyphs → word), in plain English:
+    1. Turn the four symbols back into digits 0..6.
+    2. Convert those digits into a number.
+    3. Use that number to pick the word from the same list/key.
+    4. Result: one code → exactly one word. No guessing.
+
+- Guarantees:
+    - Exact round‑trip: the 4 glyphs you see always decode to the original word.
+    - Works offline; deterministic; no external services required.
 
 Input rules:
 
