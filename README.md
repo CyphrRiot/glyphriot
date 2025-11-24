@@ -27,12 +27,12 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ```bash
 # Recommended: interactive with --prompt (enter key twice to confirm)
-glyphriot --prompt ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△  ●□▽✕  ○△△◇  ◇□✕◇  ✕▽✕✕  ◇●△◇  □▽□▽
+glyphriot --prompt ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
 Enter key: *********
 Re-enter key: *********
 Glyph:
-◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△  ●□▽✕  ○△△◇  ◇□✕◇  ✕▽✕✕  ◇●△◇  □▽□▽
-Phrase: violin era grab thunder rescue case above swim skin grass arrive man
+◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
+Phrase: violin era grab thunder rescue case
 
 # Words → glyphs (no key)
 glyphriot letter advice cage absurd amount doctor
@@ -49,6 +49,35 @@ Glyph:
 ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 Phrase: letter advice cage absurd amount doctor
 ```
+
+## Inspiration
+
+- Navajo Code Talkers: Human ingenuity using language and context to protect critical communications under extreme pressure during WWII.
+- Enigma and Allied cryptanalysis: The cat‑and‑mouse evolution of practical cryptography and operational security.
+- Historical ciphers: From substitution and transposition ciphers to rotor machines and one‑time pads—the lineage of obfuscation and key‑based secrecy.
+
+GlyphRiot is not a cipher in the classical sense; it’s an exact, keyed mapping of BIP‑39 words to a compact “glyph alphabet.” It borrows the timeless principle that the secret (key) is what unlocks meaning—while the visible artifact (glyph) can be safely shared or stored.
+
+## Why this matters (offline, salted, storable)
+
+- Protect the words with your key (salt): Use --key or --prompt to apply a deterministic, SHA‑256‑based permutation; same key, same mapping anywhere.
+- Offline conversion: Convert your seed phrase to a glyph representation entirely offline—no servers, no telemetry.
+- Safe to store the glyph: You can save the glyph in cloud storage (Dropbox, Drive, email yourself). It’s the key that unlocks the proper order and yields the exact phrase.
+- Restore forever: As long as you remember the one key you used, you can restore the exact phrase from the glyph—on any machine, offline.
+
+Recommended workflow
+
+- Encode (offline):
+    - glyphriot --prompt <words...> (enter key twice; keep a simple, human‑memorable passphrase)
+    - Save the resulting glyph somewhere convenient (txt file, notes, cloud).
+- Decode (offline):
+    - glyphriot --prompt <glyph tokens> (enter the same key; prints the exact phrase)
+
+Threat model
+
+- If the glyph is leaked without your key, the original phrase remains protected.
+- If the key is leaked, the glyph must be treated like the seed phrase.
+- If you choose no key, the glyph is equivalent to the original words (intentional—for “no‑key” workflows).
 
 ## How it works
 
