@@ -117,11 +117,14 @@ func RunSelfTest(wordsList []string, index map[string]int, keyStr string, glyphS
 		}
 
 		// Result line
-		label := "Result: PASSED"
-		if !okAll {
-			label = "Result: FAILED"
+		var result string
+		if okAll {
+			result = "PASSED"
+		} else {
+			result = "FAILED"
 			failed++
 		}
+		label := fmt.Sprintf("Result: %s — Verified: %d passes", result, sz)
 		fmt.Println(Style("  "+label, Bold))
 		printed++
 
