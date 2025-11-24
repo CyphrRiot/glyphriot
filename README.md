@@ -1,6 +1,6 @@
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v1.0-blue?labelColor=0052cc)
+![Version](https://img.shields.io/badge/version-v1.1-blue?labelColor=0052cc)
 ![Code](https://img.shields.io/badge/code-Go-00ADD8?logo=go&logoColor=white&labelColor=0f172a)
 ![Human Coded](https://img.shields.io/badge/human-coded-1e3a8a?labelColor=111827&color=1e3a8a)
 ![CypherRiot](https://img.shields.io/badge/CypherRiot-18181B?logo=github&logoColor=white&labelColor=0f172a)
@@ -31,7 +31,8 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
     - There are 2048 BIP‑39 words, so each word can have its own unique code with room to spare.
 
 - With or without a key (salt):
-    - Optional key reshuffles the word list in a predictable way (wallet‑style). Use the same key to get the same codes. No key → standard order.
+    - Optional key reshuffles the word list in a predictable way (wallet‑style).
+      Use the same key to get the same codes. No key → standard order.
 
 - Encode (words → glyphs), in plain English:
 
