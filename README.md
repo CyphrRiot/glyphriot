@@ -13,7 +13,7 @@
 
 Standardized, wallet‑style seed word glyphs.
 
-- Fixed glyph digits (exactly 7): △ □ ○ × • ◇ ▽ (☆ also accepted)
+- Fixed glyph digits (exactly 7): △ □ ○ ✕ ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted)
   Note: ▽ replaces ☆ for improved readability; old glyphs using ☆ still decode correctly.
 - Fixed length: exactly 4 glyphs per word (unique mapping; decoding returns the exact word)
 - Optional keyed salt: SHA‑256(key) → PRNG → deterministic permutation of the 2048 BIP‑39 English words
@@ -26,19 +26,27 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 ## Examples
 
 ```bash
+# Recommended: interactive with --prompt (enter key twice to confirm)
+glyphriot --prompt ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△  ●□▽✕  ○△△◇  ◇□✕◇  ✕▽✕✕  ◇●△◇  □▽□▽
+Enter key: *********
+Re-enter key: *********
+Glyph:
+◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△  ●□▽✕  ○△△◇  ◇□✕◇  ✕▽✕✕  ◇●△◇  □▽□▽
+Phrase: violin era grab thunder rescue case above swim skin grass arrive man
+
 # Words → glyphs (no key)
 glyphriot letter advice cage absurd amount doctor
-> ○▽▽▽  △△••  △◇□◇  △△□□  △□○□  □×××
+> ○▽▽▽  △△●●  △◇□◇  △△□□  △□○□  □✕✕✕
 
 # Words → glyphs (with a key)
 glyphriot --key "my secret" letter advice cage absurd amount doctor
-> ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
+> ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 
 # Glyphs → words (with a key)
-glyphriot --key "my secret" ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
+glyphriot --key "my secret" ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 
 Glyph:
-◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
+◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 Phrase: letter advice cage absurd amount doctor
 ```
 
@@ -59,7 +67,7 @@ Phrase: letter advice cage absurd amount doctor
 
 *   1.  Look up the word’s place in the (possibly reshuffled) 2048‑word list.
 *   2.  Turn that position into four base‑7 digits.
-*   3.  Replace digits 0..6 with these symbols: △ □ ○ × • ◇ ▽ (☆ also accepted).
+*   3.  Replace digits 0..6 with these symbols: △ □ ○ ✕ ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted).
 
 - Decode (glyphs → word), in plain English:
     1. Turn the four symbols back into digits 0..6.
@@ -73,7 +81,7 @@ Phrase: letter advice cage absurd amount doctor
 
 Input rules:
 
-- Only the seven glyphs △, □, ○, ×, •, ◇, ▽ are valid (× also accepts x/X; ☆ also accepted)
+- Only the seven glyphs △, □, ○, ✕, ●, ◇, ▽ are valid (aliases: x/X and × accepted as ✕; • accepted as ●; ☆ also accepted)
 - Anything else is rejected
 
 ## Install
