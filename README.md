@@ -25,13 +25,19 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ```bash
 # Words → glyphs (no key)
-./bin/glyphriot brave coconut drift zebra
+glyphriot letter advice cage absurd amount doctor acoustic avoid letter advice cage above
+> ○▽▽▽  △△••  △◇□◇  △△□□  △□○□  □×××  △△○○  △○•○  ○▽▽▽  △△••  △◇□◇  △△△•
 
 # Words → glyphs (with a key)
-./bin/glyphriot --key "my secret" brave coconut drift zebra
+glyphriot --key "my secret" letter advice cage absurd amount doctor acoustic avoid letter advice cage above
+> ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
 
-# Glyphs → words (exact)
-./bin/glyphriot '△□○×' '□□○×'
+# Glyphs → words (with a key)
+glyphriot --key "my secret" ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
+
+Glyph:
+◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
+Phrase: letter advice cage absurd amount doctor acoustic avoid letter advice cage above
 ```
 
 ## How it works
