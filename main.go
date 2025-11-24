@@ -29,10 +29,10 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-
 	"strings"
 	"syscall"
 	"time"
+	"unicode/utf8"
 
 	"glyphriot/internal"
 
@@ -60,27 +60,52 @@ func buildWordList(name, txt string) WordList {
 }
 
 func loadListFile(path string) (WordList, error) {
+	// Read file
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return WordList{}, err
+		return WordList{}, fmt.Errorf("failed to read --list-file: %w", err)
 	}
-	lines := strings.Split(strings.ReplaceAll(string(b), "\r\n", "\n"), "\n")
-	// trim trailing empty
-	if len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
-		lines = lines[:len(lines)-1]
+
+	// Enforce valid UTF-8
+	if !utf8.Valid(b) {
+		return WordList{}, fmt.Errorf("--list-file must be valid UTF-8")
 	}
+
+	// Strip UTF-8 BOM if present
+	if len(b) >= 3 && b[0] == 0xEF && b[1] == 0xBB && b[2] == 0xBF {
+		b = b[3:]
+	}
+
+	// Normalize newlines to \n
+	s := string(b)
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\r", "\n")
+
+	// Split and normalize lines: trim, lowercase, skip blanks
+	raw := strings.Split(s, "\n")
+	lines := make([]string, 0, len(raw))
+	for i := range raw {
+		lw := strings.ToLower(strings.TrimSpace(raw[i]))
+		if lw == "" {
+			continue // skip empty/whitespace-only lines
+		}
+		lines = append(lines, lw)
+	}
+
+	// Require exactly 2048 non-empty lines
+	if len(lines) != 2048 {
+		return WordList{}, fmt.Errorf("--list-file must contain exactly 2048 non-empty lines; got %d", len(lines))
+	}
+
+	// Build index and detect duplicates
 	idx := make(map[string]int, len(lines))
 	for i, w := range lines {
-		lw := strings.ToLower(strings.TrimSpace(w))
-		lines[i] = lw
-		if lw == "" {
-			continue
+		if _, exists := idx[w]; exists {
+			return WordList{}, fmt.Errorf("--list-file contains duplicate word %q at logical line %d", w, i+1)
 		}
-		idx[lw] = i
+		idx[w] = i
 	}
-	if len(lines) != 2048 {
-		fmt.Fprintf(os.Stderr, "warning: --list-file expected 2048 lines, got %d\n", len(lines))
-	}
+
 	return WordList{Name: "custom", Words: lines, Index: idx}, nil
 }
 
