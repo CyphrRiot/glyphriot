@@ -79,11 +79,11 @@ Threat model
 - If the key is leaked, the glyph must be treated like the seed phrase.
 - If you choose no key, the glyph is equivalent to the original words (intentional—for “no‑key” workflows).
 
-## Why it’s (practically) uncrackable — with a key
+## Why it’s uncrackable — with a key
 
-- Keyed permutation, not “just a cipher”: GlyphRiot uses your key to derive a deterministic, cryptographically strong permutation of the 2048 BIP‑39 words (via a SHA‑256 counter‑mode DRBG with unbiased Fisher–Yates). The glyph encodes the position within that permutation. Without the key, the mapping appears as a uniform shuffle of 2048 slots.
+- Keyed permutation, not “just a cipher”: GlyphRiot uses your key to derive a deterministic, cryptographically strong permutation of the 2048 BIP‑39 words (via a SHA‑256 counter‑mode DRBG with unbiased Fisher–Yates). The glyph encodes the position within that permutation. Without the key, the mapping is a uniform shuffle of 2048 slots.
 
-- 2^256 key space: The permutation is derived from SHA‑256(key). An attacker who only sees glyphs and doesn’t know your key faces a 2^256 search space—brute forcing is infeasible in practice.
+- 2^256 key space: The permutation is derived from SHA‑256(key). An attacker who only sees glyphs and doesn’t know your key faces a 2^256 search space—brute forcing is infeasible.
 
 - No structural leakage: Each glyph token is just a base‑7 index (encoded with △ □ ○ ✕ ● ◇ ▽). Without the permutation P (your key), the index does not reveal the original word or its prefix; the permutation uniformly distributes words across indices.
 
