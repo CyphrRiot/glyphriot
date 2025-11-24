@@ -23,7 +23,6 @@
 package main
 
 import (
-	_ "embed"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -39,9 +38,6 @@ import (
 
 	"golang.org/x/term"
 )
-
-//go:embed english.txt
-var englishTxt string
 
 // WordList encapsulates a seed word list and fast lookup index
 type WordList struct {
@@ -88,7 +84,17 @@ func loadListFile(path string) (WordList, error) {
 	return WordList{Name: "custom", Words: lines, Index: idx}, nil
 }
 
-var wlBip39 = buildWordList("bip39-en", englishTxt)
+var wlBip39 = func() WordList {
+	idx := make(map[string]int, len(internal.WordsBIP39EN))
+	for i, w := range internal.WordsBIP39EN {
+		lw := strings.ToLower(strings.TrimSpace(w))
+		if lw == "" {
+			continue
+		}
+		idx[lw] = i
+	}
+	return WordList{Name: "bip39-en", Words: internal.WordsBIP39EN, Index: idx}
+}()
 
 func usage() {
 	prog := filepath.Base(os.Args[0])
@@ -395,7 +401,8 @@ func main() {
 	if *selfTest {
 		// Paginate self-test output similar to --all
 		outIsTTY := term.IsTerminal(int(syscall.Stdout))
-		paginate := *pager && outIsTTY
+		inIsTTY := term.IsTerminal(int(syscall.Stdin))
+		paginate := *pager && outIsTTY && inIsTTY
 		_, height, _ := term.GetSize(int(syscall.Stdout))
 		if height <= 0 {
 			height = 24
@@ -412,7 +419,8 @@ func main() {
 	if *all {
 		p, _ := internal.Derive(len(active.Words), keyStr)
 		outIsTTY := term.IsTerminal(int(syscall.Stdout))
-		paginate := *pager && outIsTTY
+		inIsTTY := term.IsTerminal(int(syscall.Stdin))
+		paginate := *pager && outIsTTY && inIsTTY
 		_, height, _ := term.GetSize(int(syscall.Stdout))
 		if height <= 0 {
 			height = 24
