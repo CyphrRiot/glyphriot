@@ -58,7 +58,7 @@ Phrase: letter advice cage absurd amount doctor
 - Machines that taught humility: Enigma and Allied cryptanalysis shaped how we think about practical cryptography and operational security.
 - Simple ideas that endure: substitution tables, transposition, and one‑time pads—clear lessons about secrecy living in the key, not the artifact.
 
-What this is (and isn’t)
+### What this is (and isn’t)
 
 - This is a keyed, exact mapping between BIP‑39 words and a compact glyph alphabet. The key deterministically shuffles the list; the glyphs encode positions.
 - This is not a new cipher. It borrows a timeless principle: the key unlocks meaning. The visible artifact (glyph) can be safely stored or shared; the key stays in your head.
