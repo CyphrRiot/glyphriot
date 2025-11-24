@@ -142,7 +142,7 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.2 (standardized) — %s", version)
+	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version)
 	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
 	fmt.Println()
 
@@ -617,15 +617,27 @@ func main() {
 			return
 		}
 
-		// Otherwise, print per-token lines, plus the full phrase
-		fmt.Printf("List: %s\n", active.Name)
+		// Otherwise, print header with List/Key/Verified, then Glyph block, then Phrase
+		// Banner + Input + Header (List/Key/Verified)
+		fmt.Println()
+		fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version), internal.Bold, internal.Purple))
+		fmt.Println()
+		inputLine := strings.Join(normTokens, " ")
+		fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputLine)
+
+		// List (normal), Key (cyan), Verified (cyan)
+		headerLine := fmt.Sprintf("%s %s", internal.Style("List:", internal.Bold, internal.Blue), active.Name)
 		if strings.TrimSpace(keyStr) != "" {
-			fmt.Printf("Key: set\n")
+			headerLine += fmt.Sprintf("  %s set", internal.Style("Key:", internal.Bold, internal.Cyan))
 		}
+		headerLine += fmt.Sprintf("  %s %d %s", internal.Style("Verified:", internal.Bold, internal.Cyan), len(normTokens), "passes")
+		fmt.Println(headerLine)
+
 		gOut := make([]string, len(normTokens))
 		for i, tok := range normTokens {
 			gOut[i] = internal.InsertSep(tok, *glyphSep)
 		}
+
 		fmt.Println()
 		fmt.Println("Glyph:")
 		if len(gOut) > 12 {
@@ -634,23 +646,17 @@ func main() {
 		} else {
 			fmt.Println(strings.Join(gOut, *sep))
 		}
-		fmt.Println("Phrase:", strings.Join(decoded, " "))
+
+		fmt.Println()
+		fmt.Println(internal.Style("Phrase:", internal.Bold, internal.Purple))
+		fmt.Println(strings.Join(decoded, " "))
+		fmt.Println()
 
 		return
 	}
 
-	// Otherwise treat as words → glyphs
-	effKeyEnc := keyStr
-	if strings.TrimSpace(keyStr) != "" {
-		minBits := internal.MinBitsForContext(len(tokens))
-		effSeed, errK := internal.MustEffectiveKeyMaterial(keyStr, minBits, policy)
-		if errK != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", errK)
-			os.Exit(2)
-		}
-		effKeyEnc = string(effSeed[:])
-	}
-	glyphs, err := internal.EncodeWords(tokens, active.Index, active.Words, effKeyEnc)
+	// Otherwise treat as words → glyphs (with round-trip verification)
+	glyphs, err := internal.EncodeWordsVerified(tokens, active.Index, active.Words, keyStr, policy)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(2)
@@ -658,13 +664,30 @@ func main() {
 	for i := range glyphs {
 		glyphs[i] = internal.InsertSep(glyphs[i], *glyphSep)
 	}
+	// Banner + Input + Header (List/Key/Verified)
 	fmt.Println()
+	fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version), internal.Bold, internal.Purple))
+	fmt.Println()
+	inputWords := strings.Join(tokens, " ")
+	fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputWords)
+
+	// List (blue), Key (cyan), Verified (cyan)
+	headerLineEnc := fmt.Sprintf("%s %s", internal.Style("List:", internal.Bold, internal.Blue), active.Name)
+	if strings.TrimSpace(keyStr) != "" {
+		headerLineEnc += fmt.Sprintf("  %s set", internal.Style("Key:", internal.Bold, internal.Cyan))
+	}
+	headerLineEnc += fmt.Sprintf("  %s %d %s", internal.Style("Verified:", internal.Bold, internal.Cyan), len(glyphs), "passes")
+	fmt.Println(headerLineEnc)
+
+	fmt.Println()
+	fmt.Println(internal.Style("Glyph:", internal.Bold, internal.Purple))
 	if len(glyphs) == 24 {
 		fmt.Println(strings.Join(glyphs[:12], *sep))
 		fmt.Println(strings.Join(glyphs[12:], *sep))
 	} else {
 		fmt.Println(strings.Join(glyphs, *sep))
 	}
+	fmt.Println()
 }
 
 // Helpers
