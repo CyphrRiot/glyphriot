@@ -79,6 +79,25 @@ Threat model
 - If the key is leaked, the glyph must be treated like the seed phrase.
 - If you choose no key, the glyph is equivalent to the original words (intentional—for “no‑key” workflows).
 
+## Why it’s (practically) uncrackable — with a key
+
+- Keyed permutation, not “just a cipher”: GlyphRiot uses your key to derive a deterministic, cryptographically strong permutation of the 2048 BIP‑39 words (via a SHA‑256 counter‑mode DRBG with unbiased Fisher–Yates). The glyph encodes the position within that permutation. Without the key, the mapping appears as a uniform shuffle of 2048 slots.
+- 2^256 key space: The permutation is derived from SHA‑256(key). An attacker who only sees glyphs and doesn’t know your key faces a 2^256 search space—brute forcing is infeasible in practice.
+- No structural leakage: Each glyph token is just a base‑7 index (encoded with △ □ ○ ✕ ● ◇ ▽). Without the permutation P (your key), the index does not reveal the original word or its prefix; the permutation uniformly distributes words across indices.
+- Offline and deterministic: Nothing is sent anywhere. There’s no server‑side oracle. Given the same key and list, you get the same mapping on any machine—so you can safely store the glyph and rely on the key alone for recovery.
+
+Threat model
+
+- If the glyph is exposed and the key remains secret: the original phrase is protected.
+- If the key is exposed: treat the glyph like the seed phrase.
+- If you choose no key: the glyph is equivalent to the original words (intentional for “no‑key” workflows).
+
+Security tips
+
+- Always use a key (salt): Use --prompt to enter it twice and confirm.
+- Choose a strong passphrase: GlyphRiot hashes your key with SHA‑256 (fast and deterministic). Prefer a long passphrase (e.g., 4–6 random words) for high entropy.
+- Keep the key in your head, store the glyph anywhere: The glyph can live in your cloud drive, notes app, or email—because it’s the key that unlocks the correct order.
+
 ## How it works
 
 - What this tool does (in one sentence):
