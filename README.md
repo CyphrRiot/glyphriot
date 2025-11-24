@@ -55,13 +55,27 @@ Input rules:
 ## Install
 
 Download for Linux (latest binary): https://raw.githubusercontent.com/CyphrRiot/glyphriot/main/bin/glyphriot
+Windows (prebuilt or build yourself): https://raw.githubusercontent.com/CyphrRiot/glyphriot/main/bin/glyphriot-windows-amd64.exe (or run: make build-windows-amd64)
 
-Requires Go 1.25+.
+Quick download and run:
 
 ```bash
-make          # build ./bin/glyphriot
-make install  # install to ~/.local/bin/glyphriot
-make clean    # remove build artifact
+curl -L -o glyphriot https://raw.githubusercontent.com/CyphrRiot/glyphriot/main/bin/glyphriot
+chmod +x glyphriot
+./glyphriot --help
+```
+
+From source (Go 1.25+):
+
+```bash
+make                   # build ./bin/glyphriot (native platform)
+make install           # install to ~/.local/bin/glyphriot
+make clean             # remove build artifact
+
+# Cross-compile targets (artifacts in ./bin)
+make build-linux-amd64     # build ./bin/glyphriot-linux-amd64
+make build-linux-arm64     # build ./bin/glyphriot-linux-arm64
+make build-windows-amd64   # build ./bin/glyphriot-windows-amd64.exe
 ```
 
 ## Usage
@@ -95,6 +109,26 @@ Full table (for the active list, salted if key set):
 ./bin/glyphriot --all | less
 ```
 
+Self-test (with and without a key):
+
+```bash
+# No key
+./bin/glyphriot --self-test
+
+# With key (deterministic shuffle; use the same key to get the same codes)
+./bin/glyphriot --key "test-key" --self-test
+```
+
+Key handling (prompt or flag):
+
+```bash
+# Prompt for key (masked by default); overrides --key if both are present
+./bin/glyphriot --prompt brave coconut drift zebra
+
+# Prompt and decode glyphs
+./bin/glyphriot --prompt '△□○×' '□□○×'
+```
+
 Options summary:
 
 - --list bip39-en|auto (default: bip39-en)
@@ -103,6 +137,16 @@ Options summary:
 - --all (print index, word, 4‑glyph code; paged on TTY by default; use --pager=false to disable)
 - --glyph-sep SEP (insert a visible separator between glyphs in output; decoding strips it)
 - --phrase-only (when decoding glyphs, print only the recovered phrase)
+
+## Custom list validation
+
+If you use --list-file, your file must meet these rules:
+
+- UTF‑8 encoded (a UTF‑8 BOM is accepted and stripped automatically)
+- Exactly 2048 non‑empty lines (one word per line)
+- Whitespace is trimmed; words are treated case‑insensitively (lowercased)
+- Duplicate words are rejected with a clear error
+- Newlines are normalized (CRLF and CR are handled)
 
 ## Decoding
 
