@@ -6,14 +6,14 @@ OUTBIN := $(OUTDIR)/$(BINARY)
 PREFIX ?= $(HOME)/.local
 BINDIR := $(PREFIX)/bin
 GOFLAGS ?=
-LDFLAGS ?=
+LDFLAGS ?= -X 'main.version=$(VERSION)'
 VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo dev)
 
 all: build
 
 build:
 	mkdir -p $(OUTDIR)
-	go build -o $(OUTBIN) .
+	go build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(OUTBIN) .
 	@echo "Built $(OUTBIN)"
 
 install: build

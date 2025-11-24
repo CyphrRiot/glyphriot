@@ -23,12 +23,15 @@
 package main
 
 import (
+	crand "crypto/rand"
 	"flag"
 	"fmt"
+	"math/big"
 	"math/rand"
 	"os"
 	"os/signal"
 	"path/filepath"
+
 	"strings"
 	"syscall"
 	"time"
@@ -109,6 +112,20 @@ func loadListFile(path string) (WordList, error) {
 	return WordList{Name: "custom", Words: lines, Index: idx}, nil
 }
 
+// randomKeyFromList returns a crypto‑random key by picking a random word
+// from the active word list. Falls back to "test-key" on any failure.
+func randomKeyFromList(active WordList) string {
+	if len(active.Words) == 0 {
+		return "test-key"
+	}
+	n, err := crand.Int(crand.Reader, big.NewInt(int64(len(active.Words))))
+	if err != nil {
+		return "test-key"
+	}
+	return active.Words[n.Int64()]
+}
+
+var version = "dev"
 var wlBip39 = func() WordList {
 	idx := make(map[string]int, len(internal.WordsBIP39EN))
 	for i, w := range internal.WordsBIP39EN {
@@ -125,7 +142,8 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	fmt.Println(internal.Style("GlyphRiot — Glyph Seed System v1.0 (standardized)", internal.Bold, internal.Purple))
+	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.0 (standardized) — %s", version)
+	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
 	fmt.Println()
 
 	// Usage
@@ -135,7 +153,7 @@ func usage() {
 
 	// Flags
 	fmt.Println(internal.Style("Flags:", internal.Bold, internal.Blue))
-	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-color", internal.Cyan))
+	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-color  --version", internal.Cyan))
 	fmt.Println()
 
 	// Glyphs and rules
@@ -193,21 +211,24 @@ func digitsToBucket(d []int) (int, bool) {
 func promptForKey(mask bool) (string, error) {
 	fd := int(syscall.Stdin)
 	if !term.IsTerminal(fd) {
-		return "", fmt.Errorf("--prompt requires a TTY (interactive terminal)")
+		return "", fmt.Errorf("prompt requires an interactive terminal")
 	}
-	fmt.Fprint(os.Stderr, "Enter key: ")
+	// Prompt wording reflects echo behavior
 	if !mask {
+		fmt.Fprint(os.Stderr, "Enter key (hidden): ")
 		b, err := term.ReadPassword(fd)
 		fmt.Fprintln(os.Stderr)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to read key")
 		}
 		return string(b), nil
 	}
+
+	fmt.Fprint(os.Stderr, "Enter key: ")
 	// masked: raw-mode with '*' echo and signal-safe restore
 	oldState, err := term.GetState(fd)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("terminal not ready")
 	}
 	restore := func() { _ = term.Restore(fd, oldState) }
 	done := make(chan struct{})
@@ -225,10 +246,11 @@ func promptForKey(mask bool) (string, error) {
 	if err != nil {
 		signal.Stop(sigc)
 		close(done)
-		return "", err
+		return "", fmt.Errorf("terminal not ready")
 	}
 	defer func() { restore(); signal.Stop(sigc); close(done) }()
 	_ = state
+
 	var buf []rune
 	for {
 		var b [1]byte
@@ -248,22 +270,27 @@ func promptForKey(mask bool) (string, error) {
 			}
 			continue
 		}
+		// basic printable filter (ignore control chars)
+		if ch < 0x20 || ch == 0x7f {
+			continue
+		}
 		buf = append(buf, ch)
 		fmt.Fprint(os.Stderr, "*")
 	}
 	return string(buf), nil
 }
 
-func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool, height int) int {
+func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool, height int, sets []int, title string) int {
 	p, _ := internal.Derive(len(active.Words), keyStr)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	sets := []int{12, 12, 24, 24}
 	failed := 0
 
 	printed := 0
 	header := func() {
-		fmt.Println(internal.Style("Self-test (12- and 24-word sets)", internal.Bold, internal.Blue))
-		printed++
+		if title != "" {
+			fmt.Println(internal.Style(title, internal.Bold, internal.Blue))
+			printed++
+		}
 	}
 
 	if paginate {
@@ -321,9 +348,11 @@ func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool,
 		}
 
 		// Print block for this set
-		title := fmt.Sprintf("Set %d:", si+1)
-		fmt.Println(internal.Style(title, internal.Bold, internal.Purple))
-		printed++
+		if len(sets) > 1 {
+			title := fmt.Sprintf("Set %d:", si+1)
+			fmt.Println(internal.Style(title, internal.Bold, internal.Purple))
+			printed++
+		}
 		if len(words) == 24 {
 			fmt.Printf("  Words:  %s\n", strings.Join(words[:12], " "))
 			fmt.Printf("          %s\n", strings.Join(words[12:], " "))
@@ -364,9 +393,11 @@ func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool,
 	}
 
 	// Summary
-	fmt.Printf("%s %d, %s %d\n",
-		internal.Style("Total sets:", internal.Bold), len(sets),
-		internal.Style("Failed:", internal.Bold), failed)
+	if len(sets) > 1 {
+		fmt.Printf("%s %d, %s %d\n",
+			internal.Style("Total sets:", internal.Bold), len(sets),
+			internal.Style("Failed:", internal.Bold), failed)
+	}
 
 	return failed
 }
@@ -385,9 +416,15 @@ func main() {
 	phraseOnly := flag.Bool("phrase-only", false, "Print only the recovered phrase when decoding glyphs")
 
 	glyphSep := flag.String("glyph-sep", "", "Insert this separator between glyphs when printing; decoding strips it")
+	versionFlag := flag.Bool("version", false, "Print version and exit")
 	noColor := flag.Bool("no-color", false, "Disable colored output (TTY-safe)")
 
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(version)
+		return
+	}
 
 	// Color enablement: default on for TTY unless --no-color
 	internal.SetColorEnabled(!*noColor && term.IsTerminal(int(syscall.Stdout)))
@@ -432,8 +469,28 @@ func main() {
 		if height <= 0 {
 			height = 24
 		}
-		failed := runSelfTest(active, keyStr, *glyphSep, paginate, height)
-		if failed > 0 {
+
+		totalFailed := 0
+
+		// 12 words (no key)
+		fmt.Println(internal.Style("== Self-test: 12 words (no key) ==", internal.Bold))
+		totalFailed += runSelfTest(active, "", *glyphSep, paginate, height, []int{12}, "Self-test (12-word sets)")
+
+		// 12 words (with key; crypto-random)
+		k1 := randomKeyFromList(active)
+		fmt.Println(internal.Style("== Self-test: 12 words (with key) ==", internal.Bold))
+		totalFailed += runSelfTest(active, k1, *glyphSep, paginate, height, []int{12}, "Self-test (12-word sets)")
+
+		// 24 words (no key)
+		fmt.Println(internal.Style("== Self-test: 24 words (no key) ==", internal.Bold))
+		totalFailed += runSelfTest(active, "", *glyphSep, paginate, height, []int{24}, "Self-test (24-word sets)")
+
+		// 24 words (with key; crypto-random)
+		k2 := randomKeyFromList(active)
+		fmt.Println(internal.Style("== Self-test: 24 words (with key) ==", internal.Bold))
+		totalFailed += runSelfTest(active, k2, *glyphSep, paginate, height, []int{24}, "Self-test (24-word sets)")
+
+		if totalFailed > 0 {
 			os.Exit(1)
 		}
 		return
@@ -520,16 +577,12 @@ func main() {
 
 	if isGlyph {
 
-		decoded := make([]string, 0, len(normTokens))
-
-		// Decode all tokens first
-		for _, tok := range normTokens {
-			word, err := internal.DecodeGlyphToken(strings.TrimSpace(tok), active.Words, keyStr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				os.Exit(2)
-			}
-			decoded = append(decoded, word)
+		// Decode all tokens first (batch)
+		decoded, err := internal.DecodeGlyphTokens(normTokens, active.Words, keyStr)
+		if err != nil {
+			// Sanitize detailed decode errors to avoid exposing sensitive input
+			fmt.Fprintln(os.Stderr, "error: invalid glyph input")
+			os.Exit(2)
 		}
 
 		// If phrase-only, print just the phrase and exit

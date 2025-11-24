@@ -103,3 +103,42 @@ func DecodeGlyphToken(tok string, wordsList []string, key string) (string, error
 	}
 	return wordsList[idx], nil
 }
+
+// DecodeGlyphTokens decodes a batch of 4‑glyph tokens using a single permutation derivation.
+// It returns one decoded word per input token (skips empty tokens), or an error if any token is invalid.
+func DecodeGlyphTokens(tokens []string, wordsList []string, key string) ([]string, error) {
+	if len(wordsList) != Total {
+		return nil, fmt.Errorf("wordsList length must be %d, got %d", Total, len(wordsList))
+	}
+	p, _ := Derive(len(wordsList), key)
+
+	out := make([]string, 0, len(tokens))
+	for _, tok := range tokens {
+		t := strings.TrimSpace(tok)
+		if t == "" {
+			continue
+		}
+		runes := []rune(t)
+		if len(runes) != Len {
+			return nil, fmt.Errorf("glyph %q must be exactly %d symbols", tok, Len)
+		}
+		d := make([]int, Len)
+		for i, r := range runes {
+			val, ok := Decode[r]
+			if !ok {
+				return nil, fmt.Errorf("invalid glyph rune %q in %q", r, tok)
+			}
+			d[i] = val
+		}
+		code, ok := FromDigits(d)
+		if !ok {
+			return nil, fmt.Errorf("invalid glyph code %q", tok)
+		}
+		idx := p[code]
+		if idx < 0 || idx >= len(wordsList) {
+			return nil, fmt.Errorf("invalid glyph code %q", tok)
+		}
+		out = append(out, wordsList[idx])
+	}
+	return out, nil
+}
