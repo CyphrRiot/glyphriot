@@ -11,7 +11,8 @@
 
 Standardized, wallet‑style seed word glyphs.
 
-- Fixed glyph digits (exactly 7): △ □ ○ × • ◇ ☆
+- Fixed glyph digits (exactly 7): △ □ ○ × • ◇ ▽ (☆ also accepted)
+  Note: ▽ replaces ☆ for improved readability; old glyphs using ☆ still decode correctly.
 - Fixed length: exactly 4 glyphs per word (unique mapping; decoding returns the exact word)
 - Optional keyed salt: SHA‑256(key) → PRNG → deterministic permutation of the 2048 BIP‑39 English words
 - Behavior mirrors wallet UX (Ledger/Trezor/MetaMask):
@@ -33,9 +34,10 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
     - Optional key reshuffles the word list in a predictable way (wallet‑style). Use the same key to get the same codes. No key → standard order.
 
 - Encode (words → glyphs), in plain English:
-    1. Look up the word’s place in the (possibly reshuffled) 2048‑word list.
-    2. Turn that position into four base‑7 digits.
-    3. Replace digits 0..6 with these symbols: △ □ ○ × • ◇ ☆.
+
+*   1.  Look up the word’s place in the (possibly reshuffled) 2048‑word list.
+*   2.  Turn that position into four base‑7 digits.
+*   3.  Replace digits 0..6 with these symbols: △ □ ○ × • ◇ ▽ (☆ also accepted).
 
 - Decode (glyphs → word), in plain English:
     1. Turn the four symbols back into digits 0..6.
@@ -49,7 +51,7 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 Input rules:
 
-- Only the seven glyphs △, □, ○, ×, •, ◇, ☆ are valid (× also accepts x/X when typing)
+- Only the seven glyphs △, □, ○, ×, •, ◇, ▽ are valid (× also accepts x/X; ☆ also accepted)
 - Anything else is rejected
 
 ## Install

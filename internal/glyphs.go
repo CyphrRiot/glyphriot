@@ -27,7 +27,7 @@ package internal
 //         decode: wordIndex = P[CodeToPos(code)]
 //
 // Glyph set (0..6):
-//   0: △   1: □   2: ○   3: ×   4: •   5: ◇   6: ☆
+//   0: △   1: □   2: ○   3: ×   4: •   5: ◇   6: ▽  (☆ historical alias)
 // Convenience: 'x' or 'X' are accepted as aliases for × when parsing.
 
 const (
@@ -40,7 +40,7 @@ const (
 )
 
 // Digits defines the ordered set of 7 glyphs (0..6) used by the scheme.
-var Digits = []rune{'△', '□', '○', '×', '•', '◇', '☆'}
+var Digits = []rune{'△', '□', '○', '×', '•', '◇', '▽'}
 
 // Decode maps each glyph rune (and x/X convenience for ×) back to its digit (0..6).
 var Decode = map[rune]int{
@@ -50,6 +50,7 @@ var Decode = map[rune]int{
 	'×': 3,
 	'•': 4,
 	'◇': 5,
+	'▽': 6,
 	'☆': 6,
 	// Convenience aliases for ×:
 	'x': 3,

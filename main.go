@@ -157,7 +157,7 @@ func usage() {
 	fmt.Println()
 
 	// Glyphs and rules
-	fmt.Println(internal.Style("Glyphs (fixed):", internal.Bold, internal.Blue), "△ □ ○ × • ◇ ☆", internal.Style("(always 4 glyphs per word)", internal.Gray))
+	fmt.Println(internal.Style("Glyphs (fixed):", internal.Bold, internal.Blue), "△ □ ○ × • ◇ ▽", internal.Style("(always 4 glyphs per word)", internal.Gray))
 	fmt.Println(internal.Style("Words → glyphs; glyphs → exact word. Accepts x/X as ×.", internal.Gray))
 	fmt.Println()
 
