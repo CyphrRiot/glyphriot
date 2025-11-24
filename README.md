@@ -25,7 +25,7 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ## Examples
 
-Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled by default.
+Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled by default. With --prompt, enter your key first, then enter your seed words or glyph tokens interactively (not on the command line).
 
 ```bash
 # Recommended: interactive with --prompt (enter key twice to confirm)
@@ -193,7 +193,10 @@ Words → glyphs (always 4 glyphs per word):
 ```bash
 ./bin/glyphriot brave coconut drift zebra
 ./bin/glyphriot --key 'my secret' brave coconut drift zebra
-./bin/glyphriot --prompt --mask brave coconut drift zebra   # secure key prompt
+./bin/glyphriot --prompt                                   # secure key prompt
+Enter key: *********
+Re-enter key: *********
+Seed or Glyph: brave coconut drift zebra
 ```
 
 Glyphs → words (exact):
@@ -224,11 +227,18 @@ Self-test (with and without a key):
 Key handling (prompt or flag):
 
 ```bash
-# Prompt for key (masked by default); overrides --key if both are present
-./bin/glyphriot --prompt brave coconut drift zebra
+# Prompt for key (masked by default); overrides --key if both are present.
+# Recommended: enter your seed words or glyph tokens interactively (avoids shell history).
+./bin/glyphriot --prompt
+Enter key: *********
+Re-enter key: *********
+Seed or Glyph: brave coconut drift zebra
 
-# Prompt and decode glyphs
-./bin/glyphriot --prompt '△□○×' '□□○×'
+# Prompt and decode glyphs (interactive entry)
+./bin/glyphriot --prompt
+Enter key: *********
+Re-enter key: *********
+Seed or Glyph: △□○✕  □□○✕
 ```
 
 Options summary:
