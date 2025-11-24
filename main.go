@@ -120,6 +120,9 @@ func usage() {
 	// Decoding (concise)
 	fmt.Printf("  %s '<12 tokens>'\n", prog)
 
+	// Tip
+	fmt.Printf("  %s --help\n", prog)
+
 	// Table
 	fmt.Printf("  %s --all\n", prog)
 }
@@ -223,12 +226,12 @@ func promptForKey(mask bool) (string, error) {
 func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool, height int) int {
 	p, _ := internal.Derive(len(active.Words), keyStr)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	sets := []int{12, 12, 12, 12}
+	sets := []int{12, 12, 24, 24}
 	failed := 0
 
 	printed := 0
 	header := func() {
-		fmt.Println(internal.Style("Self-test (12-word sets)", internal.Bold, internal.Blue))
+		fmt.Println(internal.Style("Self-test (12- and 24-word sets)", internal.Bold, internal.Blue))
 		printed++
 	}
 
@@ -290,9 +293,19 @@ func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool,
 		title := fmt.Sprintf("Set %d:", si+1)
 		fmt.Println(internal.Style(title, internal.Bold, internal.Purple))
 		printed++
-		fmt.Printf("  Words:  %s\n", strings.Join(words, " "))
+		if len(words) == 24 {
+			fmt.Printf("  Words:  %s\n", strings.Join(words[:12], " "))
+			fmt.Printf("          %s\n", strings.Join(words[12:], " "))
+		} else {
+			fmt.Printf("  Words:  %s\n", strings.Join(words, " "))
+		}
 		printed++
-		fmt.Printf("  Glyphs: %s\n", strings.Join(glyphs, "  "))
+		if len(glyphs) == 24 {
+			fmt.Printf("  Glyphs: %s\n", strings.Join(glyphs[:12], "  "))
+			fmt.Printf("          %s\n", strings.Join(glyphs[12:], "  "))
+		} else {
+			fmt.Printf("  Glyphs: %s\n", strings.Join(glyphs, "  "))
+		}
 		printed++
 
 		printed++
