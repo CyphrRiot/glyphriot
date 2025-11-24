@@ -1,6 +1,6 @@
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v1.1-blue?labelColor=0052cc)
+![Version](https://img.shields.io/badge/version-v1.2-blue?labelColor=0052cc)
 ![Code](https://img.shields.io/badge/code-Go-00ADD8?logo=go&logoColor=white&labelColor=0f172a)
 ![Human Coded](https://img.shields.io/badge/human-coded-1e3a8a?labelColor=111827&color=1e3a8a)
 ![CypherRiot](https://img.shields.io/badge/CypherRiot-18181B?logo=github&logoColor=white&labelColor=0f172a)
@@ -25,11 +25,13 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ## Examples
 
+Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled by default.
+
 ```bash
 # Recommended: interactive with --prompt (enter key twice to confirm)
 glyphriot --prompt ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
-Enter key: *********
-Re-enter key: *********
+Enter key: ******************
+Re-enter key: ******************
 Glyph:
 ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
 Phrase: violin era grab thunder rescue case
@@ -39,11 +41,11 @@ glyphriot letter advice cage absurd amount doctor
 > ○▽▽▽  △△●●  △◇□◇  △△□□  △□○□  □✕✕✕
 
 # Words → glyphs (with a key)
-glyphriot --key "my secret" letter advice cage absurd amount doctor
+glyphriot --key "my secret is real" letter advice cage absurd amount doctor
 > ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 
 # Glyphs → words (with a key)
-glyphriot --key "my secret" ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
+glyphriot --key "my secret is real" ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
 
 Glyph:
 ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
@@ -97,9 +99,26 @@ Threat model
 
 Security tips
 
-- Always use a key (salt): Use --prompt to enter it twice and confirm.
+- Always use a key (salt): Use `--prompt` to enter it twice and confirm.
 - Choose a strong passphrase: GlyphRiot hashes your key with SHA‑256 (fast and deterministic). Prefer a long passphrase (e.g., 4–6 random words) for high entropy.
 - Keep the key in your head, store the glyph anywhere: The glyph can live in your cloud drive, notes app, or email—because it’s the key that unlocks the correct order.
+
+## Key strength and KDF (default: Argon2id)
+
+- Default: GlyphRiot derives the permutation seed from your key using Argon2id, then hashes with SHA‑256 to a 32‑byte seed. This makes brute‑forcing short passphrases prohibitively costly.
+- Enforcement:
+    - 12‑word context → require ≥16 characters (when Argon2id is enabled)
+    - 24‑word context → require ≥20 characters
+    - If you set --kdf=none, we enforce pure entropy by format only:
+        - BIP‑39 12/24 words, or
+        - Hex (≥32/64 chars), or
+        - Base64 (decoded ≥16/32 bytes)
+    - Use --allow-weak-key to bypass (not recommended)
+- KDF flags (tune to your hardware):
+    - --kdf argon2id|none (default: argon2id)
+    - --kdf-mem-mb (default: 512)
+    - --kdf-time (iterations; default: 3)
+    - --kdf-parallel (default: 1)
 
 ## How it works
 

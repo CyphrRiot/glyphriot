@@ -141,7 +141,7 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.1 (standardized) — %s", version)
+	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.2 (standardized) — %s", version)
 	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
 	fmt.Println()
 
@@ -347,6 +347,11 @@ func main() {
 	glyphSep := flag.String("glyph-sep", "", "Insert this separator between glyphs when printing; decoding strips it")
 	versionFlag := flag.Bool("version", false, "Print version and exit")
 	noColor := flag.Bool("no-color", false, "Disable colored output (TTY-safe)")
+	kdf := flag.String("kdf", "argon2id", "Key derivation: argon2id (default) or none")
+	kdfMem := flag.Uint("kdf-mem-mb", 512, "Argon2id memory in MB (default 512)")
+	kdfTime := flag.Uint("kdf-time", 3, "Argon2id iterations (default 3)")
+	kdfPar := flag.Uint("kdf-parallel", 1, "Argon2id parallelism (default 1)")
+	allowWeak := flag.Bool("allow-weak-key", false, "Allow weak keys (not recommended)")
 
 	flag.Parse()
 
@@ -357,6 +362,14 @@ func main() {
 
 	// Color enablement: default on for TTY unless --no-color
 	internal.SetColorEnabled(!*noColor && term.IsTerminal(int(syscall.Stdout)))
+
+	// Build key policy from flags
+	policy := internal.DefaultKeyPolicy()
+	policy.KDF = strings.ToLower(strings.TrimSpace(*kdf))
+	policy.KDFMemMB = uint32(*kdfMem)
+	policy.KDFTime = uint32(*kdfTime)
+	policy.KDFParallel = uint8(*kdfPar)
+	policy.AllowWeak = *allowWeak
 
 	// Determine active word list
 	var active WordList
@@ -406,18 +419,61 @@ func main() {
 		totalFailed += internal.RunSelfTest(active.Words, active.Index, "", *glyphSep, paginate, height, []int{12}, "Self-test (12-word sets)")
 
 		// 12 words (with key; crypto-random)
-		k1 := randomKeyFromList(active)
+		// Generate a strong passphrase (>=16 chars) from random BIP-39 words for Argon2id defaults
+		// Ensures self-test passes key-strength enforcement without --allow-weak-key
+		minCharsK1 := 16
+		var k1 string
+		{
+			var sb strings.Builder
+			for utf8.RuneCountInString(sb.String()) < minCharsK1 {
+				if sb.Len() > 0 {
+					sb.WriteByte(' ')
+				}
+				sb.WriteString(randomKeyFromList(active))
+			}
+			k1 = sb.String()
+		}
 		fmt.Println(internal.Style("== Self-test: 12 words (with key) ==", internal.Bold))
-		totalFailed += internal.RunSelfTest(active.Words, active.Index, k1, *glyphSep, paginate, height, []int{12}, "Self-test (12-word sets)")
+		{
+			minBits := internal.MinBitsForContext(12)
+			eff, err := internal.MustEffectiveKeyMaterial(k1, minBits, policy)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(2)
+			}
+			effKey := string(eff[:])
+			totalFailed += internal.RunSelfTest(active.Words, active.Index, effKey, *glyphSep, paginate, height, []int{12}, "Self-test (12-word sets)")
+		}
 
 		// 24 words (no key)
 		fmt.Println(internal.Style("== Self-test: 24 words (no key) ==", internal.Bold))
 		totalFailed += internal.RunSelfTest(active.Words, active.Index, "", *glyphSep, paginate, height, []int{24}, "Self-test (24-word sets)")
 
 		// 24 words (with key; crypto-random)
-		k2 := randomKeyFromList(active)
+		// Generate a strong passphrase (>=20 chars) from random BIP-39 words for Argon2id defaults (24-word context)
+		minCharsK2 := 20
+		var k2 string
+		{
+			var sb2 strings.Builder
+			for utf8.RuneCountInString(sb2.String()) < minCharsK2 {
+				if sb2.Len() > 0 {
+					sb2.WriteByte(' ')
+				}
+				sb2.WriteString(randomKeyFromList(active))
+			}
+			k2 = sb2.String()
+		}
 		fmt.Println(internal.Style("== Self-test: 24 words (with key) ==", internal.Bold))
-		totalFailed += internal.RunSelfTest(active.Words, active.Index, k2, *glyphSep, paginate, height, []int{24}, "Self-test (24-word sets)")
+		{
+			minBits := internal.MinBitsForContext(24)
+			eff, err := internal.MustEffectiveKeyMaterial(k2, minBits, policy)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(2)
+			}
+			effKey := string(eff[:])
+			totalFailed += internal.RunSelfTest(active.Words, active.Index, effKey, *glyphSep, paginate, height, []int{24}, "Self-test (24-word sets)")
+		}
 
 		if totalFailed > 0 {
 			os.Exit(1)
@@ -428,7 +484,16 @@ func main() {
 	// table flag retained for compatibility; not used in standardized scheme
 	_ = table
 	if *all {
-		p, _ := internal.Derive(len(active.Words), keyStr)
+		effTabKey := keyStr
+		if strings.TrimSpace(keyStr) != "" {
+			effSeed, err := internal.MustEffectiveKeyMaterial(keyStr, internal.MinBitsForContext(12), policy)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(2)
+			}
+			effTabKey = string(effSeed[:])
+		}
+		p, _ := internal.Derive(len(active.Words), effTabKey)
 		outIsTTY := term.IsTerminal(int(syscall.Stdout))
 		inIsTTY := term.IsTerminal(int(syscall.Stdin))
 		paginate := *pager && outIsTTY && inIsTTY
@@ -507,7 +572,17 @@ func main() {
 	if isGlyph {
 
 		// Decode all tokens first (batch)
-		decoded, err := internal.DecodeGlyphTokens(normTokens, active.Words, keyStr)
+		effKey := keyStr
+		if strings.TrimSpace(keyStr) != "" {
+			minBits := internal.MinBitsForContext(len(normTokens))
+			effSeed, errK := internal.MustEffectiveKeyMaterial(keyStr, minBits, policy)
+			if errK != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", errK)
+				os.Exit(2)
+			}
+			effKey = string(effSeed[:])
+		}
+		decoded, err := internal.DecodeGlyphTokens(normTokens, active.Words, effKey)
 		if err != nil {
 			// Sanitize detailed decode errors to avoid exposing sensitive input
 			fmt.Fprintln(os.Stderr, "error: invalid glyph input")
@@ -543,7 +618,17 @@ func main() {
 	}
 
 	// Otherwise treat as words → glyphs
-	glyphs, err := internal.EncodeWords(tokens, active.Index, active.Words, keyStr)
+	effKeyEnc := keyStr
+	if strings.TrimSpace(keyStr) != "" {
+		minBits := internal.MinBitsForContext(len(tokens))
+		effSeed, errK := internal.MustEffectiveKeyMaterial(keyStr, minBits, policy)
+		if errK != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", errK)
+			os.Exit(2)
+		}
+		effKeyEnc = string(effSeed[:])
+	}
+	glyphs, err := internal.EncodeWords(tokens, active.Index, active.Words, effKeyEnc)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(2)
