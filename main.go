@@ -23,6 +23,7 @@
 package main
 
 import (
+	"bufio"
 	crand "crypto/rand"
 	"flag"
 	"fmt"
@@ -542,8 +543,29 @@ func main() {
 
 	tokens := flag.Args()
 	if len(tokens) == 0 {
-		usage()
-		os.Exit(0)
+		if *prompt && term.IsTerminal(int(syscall.Stdin)) {
+			// Interactive entry: ask for key first (via --prompt), then the seed/glyphs
+			if strings.TrimSpace(keyStr) == "" {
+				ks, err := internal.PromptForKey(*mask)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					os.Exit(2)
+				}
+				keyStr = ks
+			}
+			fmt.Fprint(os.Stdout, "\nSeed or Glyph: ")
+			reader := bufio.NewReader(os.Stdin)
+			line, _ := reader.ReadString('\n')
+			fields := strings.Fields(strings.TrimSpace(line))
+			if len(fields) == 0 {
+				fmt.Fprintln(os.Stderr, "error: no input provided")
+				os.Exit(2)
+			}
+			tokens = fields
+		} else {
+			usage()
+			os.Exit(0)
+		}
 	}
 
 	// Normalize glyph tokens and detect glyph input

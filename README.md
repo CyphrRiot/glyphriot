@@ -29,11 +29,11 @@ Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled 
 
 ```bash
 # Recommended: interactive with --prompt (enter key twice to confirm)
-glyphriot --prompt ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
+glyphriot --prompt
 Enter key: ******************
 Re-enter key: ******************
-Glyph:
-◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
+Seed/Glyph: ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
+
 Phrase: violin era grab thunder rescue case
 
 # Words → glyphs (no key)
