@@ -7,7 +7,9 @@
 
 </div>
 
-# GlyphRiot – Glyph Seed Words
+# GlyphRiot – Glyph'd Seed Words
+
+### The ultimate seed phrase obfuscation system for self-custody warriors!
 
 Standardized, wallet‑style seed word glyphs.
 
@@ -25,19 +27,19 @@ This is exactly as accurate and reliable as typing the first 4 letters during wa
 
 ```bash
 # Words → glyphs (no key)
-glyphriot letter advice cage absurd amount doctor acoustic avoid letter advice cage above
-> ○▽▽▽  △△••  △◇□◇  △△□□  △□○□  □×××  △△○○  △○•○  ○▽▽▽  △△••  △◇□◇  △△△•
+glyphriot letter advice cage absurd amount doctor
+> ○▽▽▽  △△••  △◇□◇  △△□□  △□○□  □×××
 
 # Words → glyphs (with a key)
-glyphriot --key "my secret" letter advice cage absurd amount doctor acoustic avoid letter advice cage above
-> ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
+glyphriot --key "my secret" letter advice cage absurd amount doctor
+> ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
 
 # Glyphs → words (with a key)
-glyphriot --key "my secret" ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
+glyphriot --key "my secret" ◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
 
 Glyph:
-◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇  △○▽□  •▽○▽  ◇•△•  ◇◇▽•  □□••  •□▽×
-Phrase: letter advice cage absurd amount doctor acoustic avoid letter advice cage above
+◇•△•  ◇◇▽•  □□••  •△△◇  ◇◇×•  □▽□◇
+Phrase: letter advice cage absurd amount doctor
 ```
 
 ## How it works
