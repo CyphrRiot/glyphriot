@@ -40,6 +40,7 @@ import (
 	"glyphriot/internal"
 
 	"golang.org/x/term"
+	qr "rsc.io/qr"
 )
 
 // WordList encapsulates a seed word list and fast lookup index
@@ -142,7 +143,7 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 — %s", version)
+	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version)
 	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
 	fmt.Println()
 
@@ -153,7 +154,7 @@ func usage() {
 
 	// Flags
 	fmt.Println(internal.Style("Flags:", internal.Bold, internal.Blue))
-	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-color  --version", internal.Cyan))
+	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-qr  --no-color  --version", internal.Cyan))
 	fmt.Println()
 
 	// Glyphs and rules
@@ -344,6 +345,7 @@ func main() {
 	pager := flag.Bool("pager", true, "Paginate --all output when writing to a TTY (press Enter per page); --pager=false to disable")
 	selfTest := flag.Bool("self-test", false, "Run built-in test harness (4×12-word phrases)")
 	phraseOnly := flag.Bool("phrase-only", false, "Print only the recovered phrase when decoding glyphs")
+	noQR := flag.Bool("no-qr", false, "Do not display QR code for generated glyphs")
 
 	glyphSep := flag.String("glyph-sep", "", "Insert this separator between glyphs when printing; decoding strips it")
 	versionFlag := flag.Bool("version", false, "Print version and exit")
@@ -635,7 +637,7 @@ func main() {
 		// Otherwise, print header with List/Key/Verified, then Glyph block, then Phrase
 		// Banner + Input + Header (List/Key/Verified)
 		fmt.Println()
-		fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version), internal.Bold, internal.Purple))
+		fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version), internal.Bold, internal.Purple))
 		fmt.Println()
 		inputLine := strings.Join(normTokens, " ")
 		fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputLine)
@@ -647,6 +649,9 @@ func main() {
 		}
 		headerLine += fmt.Sprintf("  %s %d %s", internal.Style("Verified:", internal.Bold, internal.Cyan), len(normTokens), "passes")
 		fmt.Println(headerLine)
+		if strings.TrimSpace(keyStr) == "" && !*prompt {
+			fmt.Println(internal.Style("WARNING: USING DEFAULT KEY. USE --KEY OR --PROMPT FOR SECURE GLYPHS!", internal.Bold, internal.Red))
+		}
 
 		gOut := make([]string, len(normTokens))
 		for i, tok := range normTokens {
@@ -716,7 +721,7 @@ func main() {
 	}
 	// Banner + Input + Header (List/Key/Verified)
 	fmt.Println()
-	fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version), internal.Bold, internal.Purple))
+	fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version), internal.Bold, internal.Purple))
 	fmt.Println()
 	inputWords := strings.Join(tokens, " ")
 	fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputWords)
@@ -728,6 +733,9 @@ func main() {
 	}
 	headerLineEnc += fmt.Sprintf("  %s %d %s", internal.Style("Verified:", internal.Bold, internal.Cyan), len(glyphs), "passes")
 	fmt.Println(headerLineEnc)
+	if strings.TrimSpace(keyStr) == "" && !*prompt {
+		fmt.Println(internal.Style("WARNING: USING DEFAULT KEY. USE --KEY OR --PROMPT FOR SECURE GLYPHS!", internal.Bold, internal.Red))
+	}
 
 	fmt.Println()
 	fmt.Println(internal.Style("Glyph:", internal.Bold, internal.Purple))
@@ -736,6 +744,50 @@ func main() {
 		fmt.Println(strings.Join(glyphs[12:], *sep))
 	} else {
 		fmt.Println(strings.Join(glyphs, *sep))
+	}
+	if !*noQR {
+		outIsTTY := term.IsTerminal(int(syscall.Stdout))
+		inIsTTY := term.IsTerminal(int(syscall.Stdin))
+		show := true
+		if outIsTTY && inIsTTY {
+			fmt.Fprint(os.Stdout, "\nShow QR Code [Y/n]: ")
+			reader := bufio.NewReader(os.Stdin)
+			ans, _ := reader.ReadString('\n')
+			ans = strings.TrimSpace(ans)
+			if len(ans) > 0 && (ans[0] == 'n' || ans[0] == 'N') {
+				show = false
+			}
+		}
+		if show {
+			fmt.Println()
+			payload := strings.Join(glyphs, " ")
+			if code, err := qr.Encode(payload, qr.M); err == nil {
+				size := code.Size
+				for y := 0; y < size; y += 2 {
+					var line strings.Builder
+					for x := 0; x < size; x++ {
+						top := code.Black(x, y)
+						bottom := false
+						if y+1 < size {
+							bottom = code.Black(x, y+1)
+						}
+						switch {
+						case top && bottom:
+							line.WriteRune('█')
+						case top && !bottom:
+							line.WriteRune('▀')
+						case !top && bottom:
+							line.WriteRune('▄')
+						default:
+							line.WriteByte(' ')
+						}
+					}
+					fmt.Fprintln(os.Stdout, line.String())
+				}
+			} else {
+				fmt.Fprintln(os.Stdout, "(QR generation failed)")
+			}
+		}
 	}
 	fmt.Println()
 }

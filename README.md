@@ -52,7 +52,9 @@ Glyph:
 Phrase: letter advice cage absurd amount doctor
 ```
 
-## Inspiration (with respect)
+![Compared to Others](Images/Comparison.png)
+
+[Comparison in HTML](Pages/comparison.html)
 
 - People who protected messages: Navajo Code Talkers used language and context to keep communications safe under extreme pressure.
 - Machines that taught humility: Enigma and Allied cryptanalysis shaped how we think about practical cryptography and operational security.
@@ -71,7 +73,9 @@ Phrase: letter advice cage absurd amount doctor
 - Safe to store the glyph: You can save the glyph in cloud storage (Dropbox, Drive, email yourself). It’s the key that unlocks the proper order and yields the exact phrase.
 - Restore forever: As long as you remember the one key you used, you can restore the exact phrase from the glyph—on any machine, offline.
 
-Recommended workflow
+![Trade offs](Images/TradeOffs.png)
+
+### Recommended workflow
 
 - Encode (offline):
     - `glyphriot --prompt` enter key twice; keep a simple, human‑memorable passphrase)

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GlyphRiot vs Other Glyph-Style Seed Systems</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #0d1117;
+                --bg-alt: #161b22;
+                --text: #f0f6fc;
+                --text-dim: #8b949e;
+                --accent: #58a6ff;
+                --accent-dark: #1f6feb;
+                --purple: #bc8cff;
+                --green: #3fb950;
+                --red: #f85149;
+                --yellow: #f5a97f;
+                --border: #30363d;
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: var(--bg);
+                color: var(--text);
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
+                line-height: 1.6;
+            }
+
+            header {
+                background: linear-gradient(135deg, #1f6feb, #7c3aed);
+                padding: 4rem 2rem;
+                text-align: center;
+                box-shadow: 0 8px 32px var(--shadow);
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 3.2rem;
+                font-weight: 700;
+                background: linear-gradient(90deg, #58a6ff, #c084fc);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .subtitle {
+                font-size: 1.3rem;
+                opacity: 0.9;
+                margin-top: 0.5rem;
+                color: #e6edf3;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin: 2rem 0;
+                background: var(--bg-alt);
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 12px 40px var(--shadow);
+            }
+
+            th,
+            td {
+                padding: 1.4rem 1.2rem;
+                text-align: left;
+                border-bottom: 1px solid var(--border);
+            }
+
+            th {
+                background: #21262d;
+                font-weight: 600;
+                font-size: 1.1rem;
+                color: var(--accent);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            th:first-child {
+                border-top-left-radius: 16px;
+            }
+
+            th:last-child {
+                border-top-right-radius: 16px;
+            }
+
+            tr:hover td {
+                background: rgba(88, 166, 255, 0.08);
+            }
+
+            .glyphriot {
+                background: rgba(88, 166, 255, 0.12);
+                font-weight: 600;
+            }
+            .bipemoji {
+                background: rgba(188, 140, 255, 0.1);
+            }
+            .emojiwallet {
+                background: rgba(245, 169, 127, 0.08);
+            }
+            .seedqr {
+                background: rgba(63, 185, 80, 0.08);
+            }
+
+            .check {
+                color: var(--green);
+                font-weight: bold;
+            }
+            .cross {
+                color: var(--red);
+            }
+            .warning {
+                color: var(--yellow);
+            }
+
+            .glyphs {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 1.6rem;
+                letter-spacing: 4px;
+                background: #0d1117;
+                padding: 0.6rem 1rem;
+                border-radius: 8px;
+                display: inline-block;
+                margin: 0.5rem 0;
+            }
+
+            .footer {
+                text-align: center;
+                padding: 3rem 1rem;
+                color: var(--text-dim);
+                font-size: 0.95rem;
+            }
+
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2.4rem;
+                }
+                table {
+                    font-size: 0.9rem;
+                }
+                th,
+                td {
+                    padding: 1rem 0.8rem;
+                }
+                .glyphs {
+                    font-size: 1.3rem;
+                    letter-spacing: 2px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>GlyphRiot</h1>
+            <p class="subtitle">
+                (Versus Other Public Glyph-Style Seed Phrase Systems)
+            </p>
+        </header>
+
+        <div class="container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>GlyphRiot</th>
+                        <th>BIP-EmojiSeed</th>
+                        <th>Emoji Wallet</th>
+                        <th>SeedQR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Symbol Set</strong></td>
+                        <td class="glyphriot">
+                            7 abstract glyphs<br />
+                            <div class="glyphs">△□○×●◇▽</div>
+                        </td>
+                        <td class="bipemoji">
+                            2048 unique emoji pairs<br /><small
+                                >e.g. become → 🐛🦋</small
+                            >
+                        </td>
+                        <td class="emojiwallet">
+                            Any Unicode emoji sequence<br /><small
+                                >💀☠️🔥💀</small
+                            >
+                        </td>
+                        <td class="seedqr">
+                            QR code matrix<br /><small
+                                >Black/white squares</small
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Encoding</strong></td>
+                        <td class="glyphriot">
+                            Key-derived permutation + base-7 (4 glyphs/word)
+                        </td>
+                        <td class="bipemoji">
+                            Deterministic 1:1 word → emoji pair mapping
+                        </td>
+                        <td class="emojiwallet">
+                            Hash of emoji string → HD key
+                        </td>
+                        <td class="seedqr">Compact QR of full BIP-39 phrase</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Security Model</strong></td>
+                        <td class="glyphriot check">
+                            Uncrackable without key<br />Argon2id + 2048!
+                            permutation
+                        </td>
+                        <td class="bipemoji">
+                            Same as BIP-39<br />No added protection
+                        </td>
+                        <td class="emojiwallet warning">
+                            Hash-based checksum<br />Platform normalization
+                            risks
+                        </td>
+                        <td class="seedqr">
+                            Same as BIP-39<br />No obfuscation
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>BIP-39 Compatibility</strong></td>
+                        <td class="glyphriot check">
+                            Full (encodes/decodes any list)
+                        </td>
+                        <td class="bipemoji check">Full (visual overlay)</td>
+                        <td class="emojiwallet warning">
+                            Partial (derives keys)
+                        </td>
+                        <td class="seedqr check">Full (standard QR)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Human Readability</strong></td>
+                        <td class="glyphriot">High (compact, abstract)</td>
+                        <td class="bipemoji check">Excellent (semantic)</td>
+                        <td class="emojiwallet">Fun but ambiguous</td>
+                        <td class="seedqr cross">None (machine-only)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Compactness (24 words)</strong></td>
+                        <td class="glyphriot check">96 glyphs (4×24)</td>
+                        <td class="bipemoji">48 emoji pairs</td>
+                        <td class="emojiwallet">Variable</td>
+                        <td class="seedqr check">~2900 modules (QR v40)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Key Required?</strong></td>
+                        <td class="glyphriot check">
+                            Yes (passphrase-protected)
+                        </td>
+                        <td class="bipemoji cross">No</td>
+                        <td class="emojiwallet cross">No</td>
+                        <td class="seedqr cross">No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status (Nov 2025)</strong></td>
+                        <td class="glyphriot">
+                            Production CLI with key policy
+                        </td>
+                        <td class="bipemoji">MIT spec, some wallet support</td>
+                        <td class="emojiwallet">GitHub prototype</td>
+                        <td class="seedqr">Standard in SeedSigner/Jade</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <p>
+                    <strong>GlyphRiot</strong> is the only glyph system that is
+                    truly <strong>uncrackable without the key</strong> —
+                    combining visual compactness with cryptographic protection.
+                </p>
+                <p>
+                    Perfect for secure metal plates, inheritance planning, or
+                    sharing backups safely.
+                </p>
+                <p>Made with ❤️ for the sovereign future — November 2025</p>
+            </div>
+        </div>
+    </body>
+</html>

@@ -34,6 +34,7 @@ const (
 	Cyan   = "\x1b[38;2;42;195;222m"  // Tokyo Night cyan
 	Purple = "\x1b[38;2;187;154;247m" // Tokyo Night purple
 	Gray   = "\x1b[38;2;136;146;176m" // Dimmed foreground
+	Red    = "\x1b[38;2;247;118;142m" // Tokyo Night red
 )
 
 // SetColorEnabled toggles ANSI styling on or off.
