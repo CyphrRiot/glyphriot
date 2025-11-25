@@ -9,7 +9,7 @@ GOFLAGS ?=
 LDFLAGS ?= -X 'main.version=$(VERSION)'
 VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo dev)
 
-all: build
+all: build build-linux-amd64 build-linux-arm64 build-windows-amd64
 
 build:
 	mkdir -p $(OUTDIR)

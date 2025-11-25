@@ -28,7 +28,7 @@ func PromptForKey(mask bool) (string, error) {
 			return "", fmt.Errorf("failed to read key")
 		}
 
-		fmt.Fprint(os.Stdout, "\rRe-enter key: ")
+		fmt.Fprint(os.Stdout, "\rRe-enter:  ")
 		k2b, err := term.ReadPassword(fd)
 		fmt.Fprintln(os.Stdout)
 		if err != nil {
@@ -108,7 +108,7 @@ func PromptForKey(mask bool) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	k2, err := readMasked("Re-enter key: ")
+	k2, err := readMasked("Re-enter:  ")
 	if err != nil {
 		return "", err
 	}

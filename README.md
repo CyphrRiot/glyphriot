@@ -31,7 +31,7 @@ Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled 
 # Recommended: interactive with --prompt (enter key twice to confirm)
 glyphriot --prompt
 Enter key: ******************
-Re-enter key: ******************
+Re-enter:  ******************
 Seed/Glyph: ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
 
 Phrase: violin era grab thunder rescue case
@@ -199,7 +199,7 @@ Words → glyphs (always 4 glyphs per word):
 ./bin/glyphriot --key 'my secret' brave coconut drift zebra
 ./bin/glyphriot --prompt                                   # secure key prompt
 Enter key: *********
-Re-enter key: *********
+Re-enter:  *********
 Seed or Glyph: brave coconut drift zebra
 ```
 
@@ -241,7 +241,7 @@ Seed or Glyph: brave coconut drift zebra
 # Prompt and decode glyphs (interactive entry)
 ./bin/glyphriot --prompt
 Enter key: *********
-Re-enter key: *********
+Re-enter:  *********
 Seed or Glyph: △□○✕  □□○✕
 ```
 

@@ -142,7 +142,7 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 (standardized) — %s", version)
+	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.4 — %s", version)
 	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
 	fmt.Println()
 
@@ -353,6 +353,7 @@ func main() {
 	kdfTime := flag.Uint("kdf-time", 3, "Argon2id iterations (default 3)")
 	kdfPar := flag.Uint("kdf-parallel", 1, "Argon2id parallelism (default 1)")
 	allowWeak := flag.Bool("allow-weak-key", false, "Allow weak keys (not recommended)")
+	alias := flag.String("alias", "academic:acoustic", "Comma-separated list of word aliases (e.g., academic:acoustic,organize:organise)")
 
 	flag.Parse()
 
@@ -553,10 +554,19 @@ func main() {
 				}
 				keyStr = ks
 			}
-			fmt.Fprint(os.Stdout, "\nSeed or Glyph: ")
+			fmt.Fprint(os.Stdout, "\nSeed Words or Glyph: ")
 			reader := bufio.NewReader(os.Stdin)
-			line, _ := reader.ReadString('\n')
-			fields := strings.Fields(strings.TrimSpace(line))
+			line1, _ := reader.ReadString('\n')
+			fields1 := strings.Fields(strings.TrimSpace(line1))
+
+			// Support optional second line (for two-row glyph input). If user presses Enter directly, it's ignored.
+			fmt.Fprint(os.Stdout, "2nd line (optional):   ")
+			line2, _ := reader.ReadString('\n')
+			fields2 := strings.Fields(strings.TrimSpace(line2))
+
+			fields := append([]string{}, fields1...)
+			fields = append(fields, fields2...)
+
 			if len(fields) == 0 {
 				fmt.Fprintln(os.Stderr, "error: no input provided")
 				os.Exit(2)
@@ -656,8 +666,38 @@ func main() {
 	}
 
 	// Otherwise treat as words → glyphs (with round-trip verification)
+	// Apply word aliases (e.g., academic -> acoustic) before encoding to preserve mapping
+	if strings.TrimSpace(*alias) != "" {
+		aliasPairs := strings.Split(*alias, ",")
+		aliasMap := make(map[string]string, len(aliasPairs))
+		for _, p := range aliasPairs {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			kv := strings.SplitN(p, ":", 2)
+			if len(kv) == 2 {
+				from := strings.ToLower(strings.TrimSpace(kv[0]))
+				to := strings.ToLower(strings.TrimSpace(kv[1]))
+				if from != "" && to != "" {
+					aliasMap[from] = to
+				}
+			}
+		}
+		for i := range tokens {
+			lw := strings.ToLower(strings.TrimSpace(tokens[i]))
+			if to, ok := aliasMap[lw]; ok {
+				tokens[i] = to
+			}
+		}
+	}
 	glyphs, err := internal.EncodeWordsVerified(tokens, active.Index, active.Words, keyStr, policy)
 	if err != nil {
+		// Improve error message when a word is not found, hinting about aliases and list-file
+		if strings.Contains(err.Error(), "not in") {
+			fmt.Fprintf(os.Stderr, "error: %v (try --alias academic:acoustic or provide a custom list via --list-file)\n", err)
+			os.Exit(2)
+		}
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(2)
 	}
