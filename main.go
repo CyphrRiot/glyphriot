@@ -560,7 +560,7 @@ func main() {
 			fields1 := strings.Fields(strings.TrimSpace(line1))
 
 			// Support optional second line (for two-row glyph input). If user presses Enter directly, it's ignored.
-			fmt.Fprint(os.Stdout, "2nd line (optional):   ")
+			fmt.Fprint(os.Stdout, "2nd line (optional): ")
 			line2, _ := reader.ReadString('\n')
 			fields2 := strings.Fields(strings.TrimSpace(line2))
 
@@ -623,7 +623,12 @@ func main() {
 
 		// If phrase-only, print just the phrase and exit
 		if *phraseOnly {
-			fmt.Println(strings.Join(decoded, " "))
+			if len(decoded) == 24 {
+				fmt.Println(strings.Join(decoded[:12], " "))
+				fmt.Println(strings.Join(decoded[12:], " "))
+			} else {
+				fmt.Println(strings.Join(decoded, " "))
+			}
 			return
 		}
 
@@ -659,7 +664,12 @@ func main() {
 
 		fmt.Println()
 		fmt.Println(internal.Style("Phrase:", internal.Bold, internal.Purple))
-		fmt.Println(strings.Join(decoded, " "))
+		if len(decoded) == 24 {
+			fmt.Println(strings.Join(decoded[:12], " "))
+			fmt.Println(strings.Join(decoded[12:], " "))
+		} else {
+			fmt.Println(strings.Join(decoded, " "))
+		}
 		fmt.Println()
 
 		return

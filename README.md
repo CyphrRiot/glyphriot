@@ -13,7 +13,7 @@
 
 Standardized, wallet‑style seed word glyphs.
 
-- Fixed glyph digits (exactly 7): △ □ ○ ✕ ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted)
+- Fixed glyph digits (exactly 7): △ □ ○ × ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted)
   Note: ▽ replaces ☆ for improved readability; old glyphs using ☆ still decode correctly.
 - Fixed length: exactly 4 glyphs per word (unique mapping; decoding returns the exact word)
 - Optional keyed salt: SHA‑256(key) → PRNG → deterministic permutation of the 2048 BIP‑39 English words
@@ -32,23 +32,23 @@ Tip: Use --prompt to protect the mapping with a key (salt); Argon2id is enabled 
 glyphriot --prompt
 Enter key: ******************
 Re-enter:  ******************
-Seed/Glyph: ◇▽✕▽  ○△△✕  □◇✕□  ✕△✕▽  ●△●✕  ✕○◇△
+Seed/Glyph: ◇▽×▽  ○△△×  □◇×□  ×△×▽  ●△●×  ×○◇△
 
 Phrase: violin era grab thunder rescue case
 
 # Words → glyphs (no key)
 glyphriot letter advice cage absurd amount doctor
-> ○▽▽▽  △△●●  △◇□◇  △△□□  △□○□  □✕✕✕
+> ○▽▽▽  △△●●  △◇□◇  △△□□  △□○□  □×××
 
 # Words → glyphs (with a key)
 glyphriot --key "my secret is real" letter advice cage absurd amount doctor
-> ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
+> ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇×●  □▽□◇
 
 # Glyphs → words (with a key)
-glyphriot --key "my secret is real" ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
+glyphriot --key "my secret is real" ◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇×●  □▽□◇
 
 Glyph:
-◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇✕●  □▽□◇
+◇●△●  ◇◇▽●  □□●●  ●△△◇  ◇◇×●  □▽□◇
 Phrase: letter advice cage absurd amount doctor
 ```
 
@@ -91,7 +91,7 @@ Threat model
 
 - 2^256 key space: The permutation is derived from SHA‑256(key). An attacker who only sees glyphs and doesn’t know your key faces a 2^256 search space—brute forcing is infeasible.
 
-- No structural leakage: Each glyph token is just a base‑7 index (encoded with △ □ ○ ✕ ● ◇ ▽). Without the permutation P (your key), the index does not reveal the original word or its prefix; the permutation uniformly distributes words across indices.
+- No structural leakage: Each glyph token is just a base‑7 index (encoded with △ □ ○ × ● ◇ ▽). Without the permutation P (your key), the index does not reveal the original word or its prefix; the permutation uniformly distributes words across indices.
 
 - Offline and deterministic: Nothing is sent anywhere. There’s no server‑side oracle. Given the same key and list, you get the same mapping on any machine—so you can safely store the glyph and rely on the key alone for recovery.
 
@@ -141,7 +141,7 @@ Security tips
 
 *   1.  Look up the word’s place in the (possibly reshuffled) 2048‑word list.
 *   2.  Turn that position into four base‑7 digits.
-*   3.  Replace digits 0..6 with these symbols: △ □ ○ ✕ ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted).
+*   3.  Replace digits 0..6 with these symbols: △ □ ○ × ● ◇ ▽ (aliases: × and • accepted; ☆ also accepted).
 
 - Decode (glyphs → word), in plain English:
     1. Turn the four symbols back into digits 0..6.
@@ -155,7 +155,7 @@ Security tips
 
 Input rules:
 
-- Only the seven glyphs △, □, ○, ✕, ●, ◇, ▽ are valid (aliases: x/X and × accepted as ✕; • accepted as ●; ☆ also accepted)
+- Only the seven glyphs △, □, ○, ×, ●, ◇, ▽ are valid (aliases: x/X and × accepted as ×; • accepted as ●; ☆ also accepted)
 - Anything else is rejected
 
 ## Install
@@ -242,7 +242,7 @@ Seed or Glyph: brave coconut drift zebra
 ./bin/glyphriot --prompt
 Enter key: *********
 Re-enter:  *********
-Seed or Glyph: △□○✕  □□○✕
+Seed or Glyph: △□○×  □□○×
 ```
 
 Options summary:
