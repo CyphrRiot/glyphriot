@@ -52,6 +52,19 @@ Glyph:
 Phrase: letter advice cage absurd amount doctor
 ```
 
+# QR Code Support for Glyphs
+
+Version 1.5 adds QR Code Support.
+
+```bash
+◇▽×▽  ○△△×  □◇×□  ×△×▽  ●△●×  ×○◇△
+●□▽×  ○△△◇  ◇□×◇  ×▽××  ◇●△◇  □▽□▽
+```
+
+![QR](Images/QR.png)
+
+# Comparison Chart
+
 ![Compared to Others](Images/Comparison.png)
 
 [Comparison in HTML](Pages/comparison.html)
