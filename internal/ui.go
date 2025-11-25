@@ -66,6 +66,11 @@ func Style(s string, codes ...string) string {
 	return b.String()
 }
 
+// Banner returns the styled CLI header.
+func Banner(version string) string {
+	return Style("GlyphRiot — Glyph Seed System v1.5 — "+version, Bold, Purple)
+}
+
 // --- Glyph token formatting helpers ---
 
 // StripSepAndSpaces removes all Unicode whitespace and an optional configured

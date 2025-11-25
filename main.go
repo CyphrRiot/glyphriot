@@ -143,8 +143,7 @@ func usage() {
 	prog := filepath.Base(os.Args[0])
 
 	// Headline
-	head := fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version)
-	fmt.Println(internal.Style(head, internal.Bold, internal.Purple))
+	fmt.Println(internal.Banner(version))
 	fmt.Println()
 
 	// Usage
@@ -637,7 +636,7 @@ func main() {
 		// Otherwise, print header with List/Key/Verified, then Glyph block, then Phrase
 		// Banner + Input + Header (List/Key/Verified)
 		fmt.Println()
-		fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version), internal.Bold, internal.Purple))
+		fmt.Println(internal.Banner(version))
 		fmt.Println()
 		inputLine := strings.Join(normTokens, " ")
 		fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputLine)
@@ -721,7 +720,7 @@ func main() {
 	}
 	// Banner + Input + Header (List/Key/Verified)
 	fmt.Println()
-	fmt.Println(internal.Style(fmt.Sprintf("GlyphRiot — Glyph Seed System v1.5 — %s", version), internal.Bold, internal.Purple))
+	fmt.Println(internal.Banner(version))
 	fmt.Println()
 	inputWords := strings.Join(tokens, " ")
 	fmt.Printf("%s %s\n", internal.Style("Input:", internal.Bold, internal.Cyan), inputWords)
