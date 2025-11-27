@@ -95,7 +95,7 @@ func Style(s string, codes ...string) string {
 
 // Banner returns the styled CLI header.
 func Banner(version string) string {
-	return Style("GlyphRiot — Glyph Seed System v1.6 — "+version, Bold, Purple)
+	return Style("GlyphRiot — Glyph Seed System - "+version, Bold, Purple)
 }
 
 // --- Glyph token formatting helpers ---
