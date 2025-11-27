@@ -35,6 +35,33 @@ const (
 	Purple = "\x1b[38;2;187;154;247m" // Tokyo Night purple
 	Gray   = "\x1b[38;2;136;146;176m" // Dimmed foreground
 	Red    = "\x1b[38;2;247;118;142m" // Tokyo Night red
+
+	// Brand accent colors for optional QR tinting (foreground 24-bit ANSI)
+	BTCOrange     = "\x1b[38;2;247;147;26m" // Bitcoin orange  #F7931A
+	BTCDark       = "\x1b[38;2;168;95;0m"   // Bitcoin dark orange (watermark)
+	XMROrange     = "\x1b[38;2;255;110;0m"  // Monero orange   #FF6E00
+	ZECGold       = "\x1b[38;2;236;178;68m" // Zcash gold      #ECB244
+	ZECDark       = "\x1b[38;2;156;122;31m" // Zcash dark gold (watermark)
+	XMROrangeDark = "\x1b[38;2;176;74;0m"   // Monero dark orange (watermark)
+
+	// Subtle watermark brand tones (very light BG on white; near‑black FG on black)
+	// These add a faint hue without harming QR contrast.
+	BTCWatermarkBg = "\x1b[48;2;255;245;200m" // warm pale yellow (#FFF5C8) for white halves
+	BTCWatermarkFg = "\x1b[38;2;10;10;0m"     // near‑black with slight yellow bias (#0A0A00) for black halves
+
+	ZECWatermarkBg = "\x1b[48;2;250;235;190m" // soft pale gold (#FAEBBE) for white halves
+	ZECWatermarkFg = "\x1b[38;2;12;10;2m"     // near‑black gold‑tint (#0C0A02) for black halves
+
+	XMRWatermarkBg = "\x1b[48;2;255;240;210m" // soft pale orange (#FFF0D2) for white halves
+	XMRWatermarkFg = "\x1b[38;2;12;8;0m"      // near‑black orange‑tint (#0C0800) for black halves
+
+	// Brand background colors for QR overlays (background 24-bit ANSI)
+	BTCOrangeBg     = "\x1b[48;2;247;147;26m" // Bitcoin orange background
+	BTCDarkBg       = "\x1b[48;2;168;95;0m"   // Bitcoin dark orange background (watermark)
+	XMROrangeBg     = "\x1b[48;2;255;110;0m"  // Monero orange background
+	ZECGoldBg       = "\x1b[48;2;236;178;68m" // Zcash gold background
+	ZECDarkBg       = "\x1b[48;2;156;122;31m" // Zcash dark gold background (watermark)
+	XMROrangeDarkBg = "\x1b[48;2;176;74;0m"   // Monero dark orange background (watermark)
 )
 
 // SetColorEnabled toggles ANSI styling on or off.
@@ -68,7 +95,7 @@ func Style(s string, codes ...string) string {
 
 // Banner returns the styled CLI header.
 func Banner(version string) string {
-	return Style("GlyphRiot — Glyph Seed System v1.5 — "+version, Bold, Purple)
+	return Style("GlyphRiot — Glyph Seed System v1.6 — "+version, Bold, Purple)
 }
 
 // --- Glyph token formatting helpers ---

@@ -28,13 +28,11 @@ import (
 	"flag"
 	"fmt"
 	"math/big"
-	"math/rand"
 	"os"
 	"path/filepath"
 
 	"strings"
 	"syscall"
-	"time"
 	"unicode/utf8"
 
 	"glyphriot/internal"
@@ -153,7 +151,7 @@ func usage() {
 
 	// Flags
 	fmt.Println(internal.Style("Flags:", internal.Bold, internal.Blue))
-	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-qr  --no-color  --version", internal.Cyan))
+	fmt.Println(internal.Style("  --all  --list  --list-file  --key|--prompt  --pager  --glyph-sep  --phrase-only  --no-qr  --color  --no-color  --version", internal.Cyan))
 	fmt.Println()
 
 	// Glyphs and rules
@@ -208,130 +206,6 @@ func digitsToBucket(d []int) (int, bool) {
 	return internal.FromDigits(d)
 }
 
-// promptForKey moved to internal.PromptForKey
-
-func runSelfTest(active WordList, keyStr string, glyphSep string, paginate bool, height int, sets []int, title string) int {
-	p, _ := internal.Derive(len(active.Words), keyStr)
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	failed := 0
-
-	printed := 0
-	header := func() {
-		if title != "" {
-			fmt.Println(internal.Style(title, internal.Bold, internal.Blue))
-			printed++
-		}
-	}
-
-	if paginate {
-		header()
-	}
-
-	for si, sz := range sets {
-		poseen := make(map[int]bool)
-		seq := make([]int, 0, sz)
-		for len(seq) < sz {
-			p := r.Intn(len(active.Words))
-			if poseen[p] {
-				continue
-			}
-			poseen[p] = true
-			seq = append(seq, p)
-		}
-		words := make([]string, sz)
-		for i := 0; i < sz; i++ {
-			words[i] = active.Words[p[seq[i]]]
-		}
-		glyphs, err := internal.EncodeWords(words, active.Index, active.Words, keyStr)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "self-test encode error: %v\n", err)
-			failed++
-			continue
-		}
-		// Format glyphs with separator
-		for i := range glyphs {
-			glyphs[i] = internal.InsertSep(glyphs[i], glyphSep)
-		}
-		// Verify each token still contains its word
-		okAll := true
-		for i := 0; i < sz; i++ {
-			tokNorm := internal.StripSepAndSpaces(glyphs[i], glyphSep)
-			runes := []rune(tokNorm)
-			d := make([]int, bucketLen)
-			for j, rch := range runes {
-				d[j] = glyphDecode[rch]
-			}
-			b, _ := digitsToBucket(d)
-			start, size := bucketStartSize(b)
-			found := false
-			for k := 0; k < size; k++ {
-				idx := p[start+k]
-				if idx >= 0 && idx < len(active.Words) && active.Words[idx] == words[i] {
-					found = true
-					break
-				}
-			}
-			if !found {
-				okAll = false
-				break
-			}
-		}
-
-		// Print block for this set
-		if len(sets) > 1 {
-			title := fmt.Sprintf("Set %d:", si+1)
-			fmt.Println(internal.Style(title, internal.Bold, internal.Purple))
-			printed++
-		}
-		if len(words) == 24 {
-			fmt.Printf("  Words:  %s\n", strings.Join(words[:12], " "))
-			fmt.Printf("          %s\n", strings.Join(words[12:], " "))
-		} else {
-			fmt.Printf("  Words:  %s\n", strings.Join(words, " "))
-		}
-		printed++
-		if len(glyphs) == 24 {
-			fmt.Printf("  Glyphs: %s\n", strings.Join(glyphs[:12], "  "))
-			fmt.Printf("          %s\n", strings.Join(glyphs[12:], "  "))
-		} else {
-			fmt.Printf("  Glyphs: %s\n", strings.Join(glyphs, "  "))
-		}
-		printed++
-
-		printed++
-
-		label := fmt.Sprintf("Result: %s", map[bool]string{true: "PASSED"}[okAll])
-		if !okAll {
-			label = "Result: FAILED"
-			failed++
-		}
-		fmt.Println(internal.Style("  "+label, internal.Bold))
-		printed++
-
-		// Pagination
-		if paginate && printed >= height-1 {
-			fmt.Fprint(os.Stderr, "-- more -- (Enter to continue, q to quit) ")
-			var buf [1]byte
-			_, er := os.Stdin.Read(buf[:])
-			fmt.Fprintln(os.Stderr)
-			if er == nil && (buf[0] == 'q' || buf[0] == 'Q') {
-				break
-			}
-			printed = 0
-			header()
-		}
-	}
-
-	// Summary
-	if len(sets) > 1 {
-		fmt.Printf("%s %d, %s %d\n",
-			internal.Style("Total sets:", internal.Bold), len(sets),
-			internal.Style("Failed:", internal.Bold), failed)
-	}
-
-	return failed
-}
-
 func main() {
 	all := flag.Bool("all", false, "Generate full table for the selected word list")
 	table := flag.Bool("table", false, "Tabular output for provided words/phrase")
@@ -344,6 +218,9 @@ func main() {
 	pager := flag.Bool("pager", true, "Paginate --all output when writing to a TTY (press Enter per page); --pager=false to disable")
 	selfTest := flag.Bool("self-test", false, "Run built-in test harness (4×12-word phrases)")
 	phraseOnly := flag.Bool("phrase-only", false, "Print only the recovered phrase when decoding glyphs")
+
+	forceColor := flag.Bool("color", false, "Force ANSI colors even if stdout is not a TTY")
+
 	noQR := flag.Bool("no-qr", false, "Do not display QR code for generated glyphs")
 
 	glyphSep := flag.String("glyph-sep", "", "Insert this separator between glyphs when printing; decoding strips it")
@@ -364,7 +241,7 @@ func main() {
 	}
 
 	// Color enablement: default on for TTY unless --no-color
-	internal.SetColorEnabled(!*noColor && term.IsTerminal(int(syscall.Stdout)))
+	internal.SetColorEnabled(!*noColor && (term.IsTerminal(int(syscall.Stdout)) || *forceColor))
 
 	// Build key policy from flags
 	policy := internal.DefaultKeyPolicy()
@@ -759,6 +636,7 @@ func main() {
 		}
 		if show {
 			fmt.Println()
+			fmt.Println(internal.Style("QR:", internal.Bold, internal.Blue))
 			payload := strings.Join(glyphs, " ")
 			if code, err := qr.Encode(payload, qr.M); err == nil {
 				size := code.Size
@@ -770,16 +648,18 @@ func main() {
 						if y+1 < size {
 							bottom = code.Black(x, y+1)
 						}
+						var ch rune
 						switch {
 						case top && bottom:
-							line.WriteRune('█')
+							ch = '█'
 						case top && !bottom:
-							line.WriteRune('▀')
+							ch = '▀'
 						case !top && bottom:
-							line.WriteRune('▄')
+							ch = '▄'
 						default:
-							line.WriteByte(' ')
+							ch = ' '
 						}
+						line.WriteRune(ch)
 					}
 					fmt.Fprintln(os.Stdout, line.String())
 				}

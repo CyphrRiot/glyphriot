@@ -1,15 +1,15 @@
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v1.4-blue?labelColor=0052cc)
+![Version](https://img.shields.io/badge/version-v1.6-blue?labelColor=0052cc)
 ![Code](https://img.shields.io/badge/code-Go-00ADD8?logo=go&logoColor=white&labelColor=0f172a)
 ![Human Coded](https://img.shields.io/badge/human-coded-1e3a8a?labelColor=111827&color=1e3a8a)
 ![CypherRiot](https://img.shields.io/badge/CypherRiot-18181B?logo=github&logoColor=white&labelColor=0f172a)
 
 </div>
 
-# GlyphRiot – Glyph'd Seed Words
+# GlyphRiot
 
-### The ultimate seed phrase obfuscation system for self-custody warriors!
+### The ultimate seed phrase obfuscation system for self-custody!
 
 Standardized, wallet‑style seed word glyphs.
 
@@ -52,13 +52,13 @@ Glyph:
 Phrase: letter advice cage absurd amount doctor
 ```
 
-# QR Code Support for Glyphs
+## QR Code Support for Glyphs
 
-Version 1.5 adds QR Code Support.
+Version 1.6 adds QR Code Support. In interactive TTY sessions you’ll be prompted “Show QR Code [Y/n]:” (default Yes). Use --no-qr to skip QR output.
 
 ```bash
-◇▽×▽  ○△△×  □◇×□  ×△×▽  ●△●×  ×○◇△
-●□▽×  ○△△◇  ◇□×◇  ×▽××  ◇●△◇  □▽□▽
+ ◇▽×▽  ○△△×  □◇×□  ×△×▽  ●△●×  ×○◇△
+ ●□▽×  ○△△◇  ◇□×◇  ×▽××  ◇●△◇  □▽□▽
 ```
 
 ![QR](Images/QR.png)
@@ -75,13 +75,15 @@ Version 1.5 adds QR Code Support.
 
 ### What this is (and isn’t)
 
-- This is a keyed, exact mapping between BIP‑39 words and a compact glyph alphabet. The key deterministically shuffles the list; the glyphs encode positions.
-- This is not a new cipher. It borrows a timeless principle: the key unlocks meaning. The visible artifact (glyph) can be safely stored or shared; the key stays in your head.
+- This is a keyed, exact mapping between BIP‑39 words and a compact glyph alphabet.
+  The key deterministically shuffles the list; the glyphs encode positions.
+- This is not a new cipher.
+  It borrows a timeless principle: the key unlocks meaning.
+  The visible artifact (glyph) can be safely stored or shared; the key stays in your head.
 
 ## Why this matters (offline, salted, storable)
 
-- Protect the words with your key (salt):
-  Use `--key` or `--prompt` to apply a deterministic, SHA‑256‑based permutation; same key, same mapping anywhere.
+- Protect the words with your key (salt): Use `--key` or `--prompt` to apply a deterministic, SHA‑256‑based permutation; same key, same mapping anywhere.
 - Offline conversion: Convert your seed phrase to a glyph representation entirely offline—no servers, no telemetry.
 - Safe to store the glyph: You can save the glyph in cloud storage (Dropbox, Drive, email yourself). It’s the key that unlocks the proper order and yields the exact phrase.
 - Restore forever: As long as you remember the one key you used, you can restore the exact phrase from the glyph—on any machine, offline.
@@ -270,6 +272,7 @@ Options summary:
 - --all (print index, word, 4‑glyph code; paged on TTY by default; use --pager=false to disable)
 - --glyph-sep SEP (insert a visible separator between glyphs in output; decoding strips it)
 - --phrase-only (when decoding glyphs, print only the recovered phrase)
+- --no-qr (skip terminal QR rendering; in TTY sessions you’ll be prompted “Show QR Code [Y/n]:” by default)
 
 ## Custom list validation
 

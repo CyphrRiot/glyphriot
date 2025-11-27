@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"unicode/utf8"
 
 	"golang.org/x/term"
 )
@@ -74,34 +75,63 @@ func PromptForKey(mask bool) (string, error) {
 		defer func() { restore(); signal.Stop(sigc); close(done) }()
 		_ = state
 
-		var buf []rune
+		// UTF-8 aware masked input: accumulate bytes until a full rune is read.
+		var bytesBuf []byte
+		var runeSizes []int // stack of rune byte lengths for backspace
+		var partial []byte  // accumulate partial multi-byte sequences
+
 		for {
 			var b [1]byte
 			n, er := os.Stdin.Read(b[:])
 			if er != nil || n == 0 {
 				break
 			}
-			ch := rune(b[0])
-			if ch == '\r' || ch == '\n' {
+			by := b[0]
+
+			// Enter ends input
+			if by == '\r' || by == '\n' {
 				fmt.Fprintln(os.Stdout)
 				break
 			}
-			if ch == 0x7f || ch == '\b' { // backspace/delete
-				if len(buf) > 0 {
-					buf = buf[:len(buf)-1]
-					// Erase last '*'
-					fmt.Fprint(os.Stdout, "\b \b")
+
+			// Handle backspace/delete: remove last full rune (and erase one '*')
+			if by == 0x7f || by == '\b' {
+				if len(partial) > 0 {
+					// Drop any partial sequence being built
+					partial = partial[:0]
+				} else if len(runeSizes) > 0 {
+					sz := runeSizes[len(runeSizes)-1]
+					runeSizes = runeSizes[:len(runeSizes)-1]
+					if sz > 0 && sz <= len(bytesBuf) {
+						bytesBuf = bytesBuf[:len(bytesBuf)-sz]
+						fmt.Fprint(os.Stdout, "\b \b")
+					}
 				}
 				continue
 			}
-			// Ignore non-printable control characters
-			if ch < 0x20 || ch == 0x7f {
+
+			// Ignore other control characters
+			if by < 0x20 {
 				continue
 			}
-			buf = append(buf, ch)
-			fmt.Fprint(os.Stdout, "*")
+
+			// Build UTF-8 sequence
+			partial = append(partial, by)
+			if utf8.FullRune(partial) {
+				r, size := utf8.DecodeRune(partial)
+				if r == utf8.RuneError && size == 1 {
+					// Invalid byte, skip
+					partial = partial[:0]
+					continue
+				}
+				// Commit full rune
+				bytesBuf = append(bytesBuf, partial...)
+				runeSizes = append(runeSizes, size)
+				partial = partial[:0]
+				fmt.Fprint(os.Stdout, "*")
+			}
 		}
-		return string(buf), nil
+		return string(bytesBuf), nil
 	}
 
 	k1, err := readMasked("Enter key: ")
